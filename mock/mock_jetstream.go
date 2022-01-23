@@ -35,11 +35,9 @@ func (m *MockJetStream) EXPECT() *MockJetStreamMockRecorder {
 }
 
 // Close mocks base method.
-func (m *MockJetStream) Close() error {
+func (m *MockJetStream) Close() {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Close")
-	ret0, _ := ret[0].(error)
-	return ret0
+	m.ctrl.Call(m, "Close")
 }
 
 // Close indicates an expected call of Close.
@@ -49,17 +47,23 @@ func (mr *MockJetStreamMockRecorder) Close() *gomock.Call {
 }
 
 // Publish mocks base method.
-func (m *MockJetStream) Publish(arg0 string, arg1 []byte) error {
+func (m *MockJetStream) Publish(arg0 string, arg1 []byte, arg2 *nats.StreamConfig, arg3 ...nats.PubOpt) (*nats.PubAck, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Publish", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	varargs := []interface{}{arg0, arg1, arg2}
+	for _, a := range arg3 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Publish", varargs...)
+	ret0, _ := ret[0].(*nats.PubAck)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Publish indicates an expected call of Publish.
-func (mr *MockJetStreamMockRecorder) Publish(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockJetStreamMockRecorder) Publish(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockJetStream)(nil).Publish), arg0, arg1)
+	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockJetStream)(nil).Publish), varargs...)
 }
 
 // QueueSubscribe mocks base method.

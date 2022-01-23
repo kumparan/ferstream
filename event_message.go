@@ -27,6 +27,10 @@ type (
 		Request   []byte
 		Error     error
 	}
+
+	MessagePayload interface {
+		ParseFromBytes(data []byte) error
+	}
 )
 
 // GetID :nodoc:
@@ -68,7 +72,6 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 		n.wrapError(errors.New("empty nats nats event"))
 		return nil, n.Error
 	}
-
 
 	message, err := tapao.Marshal(n)
 	if err != nil {
@@ -129,4 +132,12 @@ func (n *NatsEventMessage) wrapError(err error) {
 		return
 	}
 	n.Error = err
+}
+
+func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
+	err = tapao.Unmarshal(data, &n, tapao.FallbackWith(tapao.JSON))
+	if err != nil {
+		return err
+	}
+	return
 }
