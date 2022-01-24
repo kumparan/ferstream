@@ -140,10 +140,7 @@ func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.St
 		return nil, ErrConnectionLost
 	}
 
-	streamInfo, err := j.jsCtx.StreamInfo(cfg.Name)
-	if err != nil {
-		return nil, err
-	}
+	streamInfo, _ := j.jsCtx.StreamInfo(cfg.Name)
 
 	if streamInfo == nil {
 		return j.jsCtx.AddStream(cfg, opts...)
