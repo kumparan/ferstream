@@ -1,7 +1,6 @@
 package ferstream
 
 import (
-	"errors"
 	"time"
 
 	"github.com/kumparan/go-utils"
@@ -12,9 +11,10 @@ import (
 type (
 	// JetStream :nodoc:
 	JetStream interface {
-		Publish(subject string, value []byte, streamConfig *nats.StreamConfig, opts ...nats.PubOpt) (*nats.PubAck, error)
+		Publish(subject string, value []byte, opts ...nats.PubOpt) (*nats.PubAck, error)
 		QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
 		Close()
+		AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error)
 	}
 
 	// jsImpl JetStream implementation
@@ -24,7 +24,7 @@ type (
 	}
 
 	// Message Handler :nodoc:
-	MessageHandler func(payload MessagePayload) (err error)
+	MessageHandler func(payload MessageParser) (err error)
 )
 
 // NewNATSConnection :nodoc:
@@ -53,7 +53,7 @@ func NewNATSConnection(url string, natsOpts ...nats.Option) (JetStream, error) {
 
 // NewNATSMessageHandler a wrapper to standardize how we handle NATS messages.
 // Payload (arg 0) should always be empty when the method is called. The payload data will later parse data from msg.Data.
-func NewNATSMessageHandler(payload MessagePayload, retryAttempts int, retryInterval time.Duration, msgHandler MessageHandler, errHandler MessageHandler) nats.MsgHandler {
+func NewNATSMessageHandler(payload MessageParser, retryAttempts int, retryInterval time.Duration, msgHandler MessageHandler, errHandler MessageHandler) nats.MsgHandler {
 	return func(msg *nats.Msg) {
 		logger := logrus.WithField("msg", utils.Dump(msg))
 		defer func(logger *logrus.Entry) {
@@ -115,27 +115,17 @@ func (j *jsImpl) checkConnIsValid() (b bool) {
 }
 
 // Publish publish message using JetStream
-func (j *jsImpl) Publish(subject string, value []byte, streamConfig *nats.StreamConfig, opts ...nats.PubOpt) (*nats.PubAck, error) {
+func (j *jsImpl) Publish(subject string, value []byte, opts ...nats.PubOpt) (*nats.PubAck, error) {
 	if !j.checkConnIsValid() {
-		return nil, errors.New("connection error")
+		return nil, ErrConnectionLost
 	}
-
-	if streamConfig == nil {
-		return nil, errors.New("stream config is required")
-	}
-
-	_, err := j.jsCtx.AddStream(streamConfig)
-	if err != nil {
-		return nil, err
-	}
-
 	return j.jsCtx.Publish(subject, value, opts...)
 }
 
 // QueueSubscribe :nodoc:
 func (j *jsImpl) QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
 	if !j.checkConnIsValid() {
-		return nil, errors.New("connection error")
+		return nil, ErrConnectionLost
 	}
 	return j.jsCtx.QueueSubscribe(subj, queue, cb, opts...)
 }
@@ -145,4 +135,12 @@ func (j *jsImpl) Close() {
 	if j.checkConnIsValid() {
 		j.natsConn.Close()
 	}
+}
+
+// AddStream add stream
+func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error) {
+	if !j.checkConnIsValid() {
+		return nil, ErrConnectionLost
+	}
+	return j.jsCtx.AddStream(cfg, opts...)
 }

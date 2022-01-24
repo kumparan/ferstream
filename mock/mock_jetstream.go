@@ -34,6 +34,26 @@ func (m *MockJetStream) EXPECT() *MockJetStreamMockRecorder {
 	return m.recorder
 }
 
+// AddStream mocks base method.
+func (m *MockJetStream) AddStream(arg0 *nats.StreamConfig, arg1 ...nats.JSOpt) (*nats.StreamInfo, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0}
+	for _, a := range arg1 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AddStream", varargs...)
+	ret0, _ := ret[0].(*nats.StreamInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AddStream indicates an expected call of AddStream.
+func (mr *MockJetStreamMockRecorder) AddStream(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0}, arg1...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddStream", reflect.TypeOf((*MockJetStream)(nil).AddStream), varargs...)
+}
+
 // Close mocks base method.
 func (m *MockJetStream) Close() {
 	m.ctrl.T.Helper()
@@ -47,10 +67,10 @@ func (mr *MockJetStreamMockRecorder) Close() *gomock.Call {
 }
 
 // Publish mocks base method.
-func (m *MockJetStream) Publish(arg0 string, arg1 []byte, arg2 *nats.StreamConfig, arg3 ...nats.PubOpt) (*nats.PubAck, error) {
+func (m *MockJetStream) Publish(arg0 string, arg1 []byte, arg2 ...nats.PubOpt) (*nats.PubAck, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{arg0, arg1, arg2}
-	for _, a := range arg3 {
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
 		varargs = append(varargs, a)
 	}
 	ret := m.ctrl.Call(m, "Publish", varargs...)
@@ -60,9 +80,9 @@ func (m *MockJetStream) Publish(arg0 string, arg1 []byte, arg2 *nats.StreamConfi
 }
 
 // Publish indicates an expected call of Publish.
-func (mr *MockJetStreamMockRecorder) Publish(arg0, arg1, arg2 interface{}, arg3 ...interface{}) *gomock.Call {
+func (mr *MockJetStreamMockRecorder) Publish(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Publish", reflect.TypeOf((*MockJetStream)(nil).Publish), varargs...)
 }
 

@@ -11,4 +11,6 @@ var (
 	ErrGiveUpProcessingMessagePayload = errors.New("ferstreamErr: give up processing message payload")
 	// ErrNilMessagePayload given when message's payload(data) is nil
 	ErrNilMessagePayload = errors.New("ferstreamErr: nil message payload given")
+	// ErrConnectionLost given when no active nats connection
+	ErrConnectionLost = errors.New("ferstreamErr: connection error")
 )

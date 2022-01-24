@@ -28,7 +28,7 @@ type (
 		Error     error
 	}
 
-	MessagePayload interface {
+	MessageParser interface {
 		ParseFromBytes(data []byte) error
 	}
 )

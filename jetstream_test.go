@@ -48,7 +48,12 @@ func TestPublish(t *testing.T) {
 		Storage:  nats.FileStorage,
 	}
 
-	_, err = n.Publish("STREAM_EVENT.TEST", []byte("test"), streamConf)
+	_, err = n.AddStream(streamConf)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = n.Publish("STREAM_EVENT.TEST", []byte("test"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,6 +79,11 @@ func TestQueueSubscribe(t *testing.T) {
 		Storage:  nats.FileStorage,
 	}
 
+	_, err = n.AddStream(streamConf)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	countMsg := 10
 	subject := "STREAM_EVENT_ANOTHER.TEST"
 	queue := "test_queue_group"
@@ -87,7 +97,7 @@ func TestQueueSubscribe(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		_, err = n.Publish(subject, msgBytes, streamConf)
+		_, err = n.Publish(subject, msgBytes)
 		if err != nil {
 			t.Fatal(err)
 		}
