@@ -139,5 +139,16 @@ func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.St
 	if !j.checkConnIsValid() {
 		return nil, ErrConnectionLost
 	}
-	return j.jsCtx.AddStream(cfg, opts...)
+
+	streamInfo, err := j.jsCtx.StreamInfo(cfg.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	if streamInfo == nil {
+		return j.jsCtx.AddStream(cfg, opts...)
+	}
+
+	return j.jsCtx.UpdateStream(cfg)
+
 }

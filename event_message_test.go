@@ -4,9 +4,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kumparan/ferstream/pb"
 	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
-	"github.com/kumparan/tapao/pb"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -100,7 +100,7 @@ func TestNatsEventMessage_Build(t *testing.T) {
 	oldBody := []string{"old test"}
 	req := &pb.Greeting{
 		Id:        23,
-		Name:      "Sob",
+		Name:      "Hai Zob",
 		CreatedAt: time.Now().String(),
 		UpdatedAt: time.Now().String(),
 	}

@@ -1,6 +1,7 @@
 package ferstream
 
 import (
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -126,4 +127,41 @@ func TestQueueSubscribe(t *testing.T) {
 	}
 
 	_ = sub.Unsubscribe()
+}
+
+func TestAddStream(t *testing.T) {
+	n, err := NewNATSConnection(defaultURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer func() {
+		n.Close()
+	}()
+
+	streamConf := &nats.StreamConfig{
+		Name:     "STREAM_NAMEXX",
+		Subjects: []string{"STREAM_EVENTXX.*"},
+		MaxAge:   2 * time.Hour,
+		Storage:  nats.FileStorage,
+	}
+
+	_, err = n.AddStream(streamConf)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// test update config
+	updateConf := &nats.StreamConfig{
+		Name:     "STREAM_NAMEXX",
+		Subjects: []string{"STREAM_EVENTXX.*"},
+		MaxAge:   2 * time.Hour,
+		Storage:  nats.FileStorage,
+	}
+
+	_, err = n.AddStream(updateConf)
+
+	if err != nil {
+		t.Fatal(err)
+	}
 }

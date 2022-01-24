@@ -1,7 +1,7 @@
 package ferstream
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
 	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
