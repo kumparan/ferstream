@@ -1,9 +1,9 @@
 package ferstream
 
 import (
-	"github.com/golang/protobuf/proto"
+	"google.golang.org/protobuf/proto"
 
-	"github.com/kumparan/go-lib/utils"
+	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
 	"github.com/pkg/errors"
 )
@@ -26,6 +26,10 @@ type (
 		OldBody   string
 		Request   []byte
 		Error     error
+	}
+
+	MessageParser interface {
+		ParseFromBytes(data []byte) error
 	}
 )
 
@@ -68,7 +72,6 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 		n.wrapError(errors.New("empty nats nats event"))
 		return nil, n.Error
 	}
-
 
 	message, err := tapao.Marshal(n)
 	if err != nil {
@@ -129,4 +132,13 @@ func (n *NatsEventMessage) wrapError(err error) {
 		return
 	}
 	n.Error = err
+}
+
+func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
+	err = tapao.Unmarshal(data, &n, tapao.FallbackWith(tapao.JSON))
+	if err != nil {
+		n.Error = errors.Wrap(n.Error, err.Error())
+		return err
+	}
+	return
 }
