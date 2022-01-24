@@ -108,10 +108,7 @@ func connect(url string, options ...nats.Option) (*nats.Conn, error) {
 }
 
 func (j *jsImpl) checkConnIsValid() (b bool) {
-	if j.natsConn != nil && j.natsConn.IsConnected() {
-		return true
-	}
-	return false
+	return j.natsConn != nil && j.natsConn.IsConnected()
 }
 
 // Publish publish message using JetStream
