@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kumparan/go-lib/utils"
+	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
 	"github.com/kumparan/tapao/pb"
 	"github.com/stretchr/testify/assert"

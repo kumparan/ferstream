@@ -3,7 +3,7 @@ package ferstream
 import (
 	"github.com/golang/protobuf/proto"
 
-	"github.com/kumparan/go-lib/utils"
+	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
 	"github.com/pkg/errors"
 )

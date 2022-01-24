@@ -13,17 +13,6 @@ import (
 
 const defaultURL = "nats://127.0.0.1:4222"
 
-// DefaultTestOptions are default options for the unit tests.
-var DefaultTestOptions = server.Options{
-	Host:                  "127.0.0.1",
-	Port:                  4222,
-	NoLog:                 false,
-	NoSigs:                true,
-	MaxControlLine:        4096,
-	DisableShortFirstPing: true,
-	JetStream:             true,
-}
-
 func RunBasicJetStreamServer() *server.Server {
 	opts := natsserver.DefaultTestOptions
 	opts.JetStream = true

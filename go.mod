@@ -12,11 +12,19 @@ require (
 )
 
 require (
+	github.com/aymerick/douceur v0.2.0 // indirect
+	github.com/cockroachdb/apd v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/getsentry/sentry-go v0.11.0 // indirect
+	github.com/goodsign/monday v1.0.0 // indirect
+	github.com/gorilla/css v1.0.0 // indirect
 	github.com/klauspost/compress v1.13.4 // indirect
+	github.com/leekchan/accounting v0.3.1 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.7 // indirect
 	github.com/minio/highwayhash v1.0.1 // indirect
 	github.com/nats-io/jwt/v2 v2.2.1-0.20220113022732-58e87895b296 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/shopspring/decimal v1.2.0 // indirect
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
 	golang.org/x/text v0.3.6 // indirect
 	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
@@ -26,6 +34,7 @@ require (
 
 require (
 	github.com/graph-gophers/graphql-go v0.0.0-20181128220952-0079757a4d96 // indirect
+	github.com/kumparan/go-utils v1.19.0
 	github.com/nats-io/nats-server/v2 v2.7.0
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect

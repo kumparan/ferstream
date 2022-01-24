@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/kumparan/go-lib/utils"
+	"github.com/kumparan/go-utils"
 	"github.com/nats-io/nats.go"
 	"github.com/sirupsen/logrus"
 )
@@ -73,7 +73,6 @@ func NewNATSMessageHandler(payload MessagePayload, retryAttempts int, retryInter
 			logger.WithField("error-detail", err).Error("Unmarshal failed")
 			return
 		}
-		defer logger.WithField("payload", utils.Dump(payload)).Warn("message payload")
 
 		retryErr := utils.Retry(retryAttempts, retryInterval, func() error {
 			return msgHandler(payload)
