@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kumparan/tapao"
 	"github.com/nats-io/nats-server/v2/server"
 	natsserver "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
+	"github.com/stretchr/testify/assert"
 )
 
 const defaultURL = "nats://127.0.0.1:4222"
@@ -69,10 +69,6 @@ func TestQueueSubscribe(t *testing.T) {
 		n.Close()
 	}()
 
-	type msg struct {
-		Data int64 `json:"data"`
-	}
-
 	streamConf := &nats.StreamConfig{
 		Name:     "STREAM_NAME_ANOTHER",
 		Subjects: []string{"STREAM_EVENT_ANOTHER.*"},
@@ -89,24 +85,23 @@ func TestQueueSubscribe(t *testing.T) {
 	subject := "STREAM_EVENT_ANOTHER.TEST"
 	queue := "test_queue_group"
 
-	for i := 0; i < countMsg; i++ {
-		ms := &msg{
-			Data: int64(1554775372665126857),
-		}
-		msgBytes, err := tapao.Marshal(ms)
-		if err != nil {
-			t.Fatal(err)
-		}
+	msgBytes, err := NewNatsEventMessage().WithEvent(&NatsEvent{
+		ID:     int64(1232),
+		UserID: int64(21),
+	}).Build()
 
+	assert.NoError(t, err)
+
+	for i := 0; i < countMsg; i++ {
 		_, err = n.Publish(subject, msgBytes)
 		if err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	receiverCh := make(chan []byte, countMsg)
+	receiverCh := make(chan *nats.Msg)
 	sub, err := n.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
-		receiverCh <- msg.Data
+		receiverCh <- msg
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -114,16 +109,9 @@ func TestQueueSubscribe(t *testing.T) {
 
 	for i := 0; i < countMsg; i++ {
 		b := <-receiverCh
-		msg := new(msg)
 
-		err = tapao.Unmarshal(b, msg)
-		if err != nil {
-			t.Fatal(err)
-		}
-
-		if msg.Data != int64(1554775372665126857) {
-			t.Fatal("error")
-		}
+		assert.Equal(t, msgBytes, b.Data)
+		assert.Equal(t, subject, b.Subject, "test subject")
 	}
 
 	_ = sub.Unsubscribe()
