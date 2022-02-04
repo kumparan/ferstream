@@ -74,6 +74,8 @@ func NewNATSMessageHandler(payload MessageParser, retryAttempts int, retryInterv
 			return
 		}
 
+		payload.AddSubject(msg.Subject)
+
 		retryErr := utils.Retry(retryAttempts, retryInterval, func() error {
 			return msgHandler(payload)
 		})

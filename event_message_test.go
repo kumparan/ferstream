@@ -21,7 +21,6 @@ func TestNatsEventMessage_WithEvent(t *testing.T) {
 			Given: &NatsEvent{
 				ID:     111,
 				UserID: 432,
-				Type:   "type",
 			},
 			ExpectedError: false,
 		},
@@ -29,23 +28,13 @@ func TestNatsEventMessage_WithEvent(t *testing.T) {
 			Name: "empty id",
 			Given: &NatsEvent{
 				UserID: 432,
-				Type:   "type",
 			},
 			ExpectedError: true,
 		},
 		{
 			Name: "empty user",
 			Given: &NatsEvent{
-				ID:   111,
-				Type: "type",
-			},
-			ExpectedError: true,
-		},
-		{
-			Name: "empty type",
-			Given: &NatsEvent{
-				ID:     111,
-				UserID: 432,
+				ID: 111,
 			},
 			ExpectedError: true,
 		},
@@ -93,7 +82,6 @@ func TestNatsEventMessage_Build(t *testing.T) {
 	event := &NatsEvent{
 		ID:     1,
 		UserID: 123,
-		Type:   "type",
 	}
 
 	body := []string{"test"}
@@ -119,7 +107,6 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, event.ID, result.NatsEvent.ID)
 		assert.Equal(t, event.UserID, result.NatsEvent.UserID)
-		assert.Equal(t, event.Type, result.NatsEvent.Type)
 		assert.Equal(t, utils.Dump(body), result.Body)
 
 		var requestResult pb.Greeting
@@ -146,7 +133,6 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.NoError(t, err)
 		assert.Equal(t, event.ID, result.NatsEvent.ID)
 		assert.Equal(t, event.UserID, result.NatsEvent.UserID)
-		assert.Equal(t, event.Type, result.NatsEvent.Type)
 		assert.Equal(t, utils.Dump(body), result.Body)
 		assert.Equal(t, utils.Dump(oldBody), result.OldBody)
 
@@ -168,15 +154,9 @@ func TestNatsEventMessage_Build(t *testing.T) {
 			nil,
 			{
 				UserID: 131,
-				Type:   "type",
 			},
 			{
-				ID:   21,
-				Type: "type",
-			},
-			{
-				ID:     33,
-				UserID: 423,
+				ID: 21,
 			},
 		}
 

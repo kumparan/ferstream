@@ -9,14 +9,11 @@ import (
 )
 
 type (
-	// EventType :nodoc:
-	EventType string
-
 	// NatsEvent :nodoc:
 	NatsEvent struct {
-		ID     int64
-		UserID int64
-		Type   EventType
+		ID      int64
+		UserID  int64
+		Subject string // empty on publish
 	}
 
 	// NatsEventMessage :nodoc:
@@ -30,6 +27,7 @@ type (
 
 	MessageParser interface {
 		ParseFromBytes(data []byte) error
+		AddSubject(subj string)
 	}
 )
 
@@ -49,12 +47,12 @@ func (n *NatsEvent) GetUserID() int64 {
 	return n.UserID
 }
 
-// GetType :nodoc:
-func (n *NatsEvent) GetType() EventType {
+// GetSubject :nodoc:
+func (n *NatsEvent) GetSubject() string {
 	if n == nil {
 		return ""
 	}
-	return n.Type
+	return n.Subject
 }
 
 // NewNatsEventMessage :nodoc:
@@ -91,10 +89,6 @@ func (n *NatsEventMessage) WithEvent(e *NatsEvent) *NatsEventMessage {
 
 	if e.GetUserID() == 0 {
 		n.wrapError(errors.New("empty user id"))
-		return n
-	}
-	if e.GetType() == "" {
-		n.wrapError(errors.New("empty NatsEvent type"))
 		return n
 	}
 
@@ -141,4 +135,8 @@ func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
 		return err
 	}
 	return
+}
+
+func (n *NatsEventMessage) AddSubject(subj string) {
+	n.NatsEvent.Subject = subj
 }
