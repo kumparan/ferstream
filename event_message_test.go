@@ -17,10 +17,19 @@ func TestNatsEventMessage_WithEvent(t *testing.T) {
 		ExpectedError bool
 	}{
 		{
-			Name: "success",
+			Name: "success without tenant id",
 			Given: &NatsEvent{
 				ID:     111,
 				UserID: 432,
+			},
+			ExpectedError: false,
+		},
+		{
+			Name: "success with tenant id",
+			Given: &NatsEvent{
+				ID:       111,
+				UserID:   432,
+				TenantID: 666,
 			},
 			ExpectedError: false,
 		},
