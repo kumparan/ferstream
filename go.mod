@@ -7,9 +7,9 @@ require (
 	github.com/kumparan/tapao v1.1.0
 	github.com/nats-io/nats.go v1.13.1-0.20211122170419-d7c1d78a50fc
 	github.com/pkg/errors v0.9.1
-	google.golang.org/protobuf v1.26.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.7.0
+	google.golang.org/protobuf v1.26.0
 )
 
 require (

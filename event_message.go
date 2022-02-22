@@ -11,9 +11,10 @@ import (
 type (
 	// NatsEvent :nodoc:
 	NatsEvent struct {
-		ID      int64
-		UserID  int64
-		Subject string // empty on publish
+		ID       int64
+		UserID   int64
+		TenantID int64
+		Subject  string // empty on publish
 	}
 
 	// NatsEventMessage :nodoc:
@@ -45,6 +46,14 @@ func (n *NatsEvent) GetUserID() int64 {
 		return 0
 	}
 	return n.UserID
+}
+
+// GetTenantID :nodoc:
+func (n *NatsEvent) GetTenantID() int64 {
+	if n == nil {
+		return 0
+	}
+	return n.TenantID
 }
 
 // GetSubject :nodoc:
