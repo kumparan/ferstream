@@ -11,24 +11,25 @@ import (
 type (
 	// NatsEvent :nodoc:
 	NatsEvent struct {
-		ID       int64
-		UserID   int64
-		TenantID int64
-		Subject  string // empty on publish
+		ID       int64  `json:"id"`
+		UserID   int64  `json:"user_id"`
+		TenantID int64  `json:"tenant_id"`
+		Subject  string `json:"subject"` // empty on publish
 	}
 
 	// NatsEventMessage :nodoc:
 	NatsEventMessage struct {
 		NatsEvent *NatsEvent
-		Body      string
-		OldBody   string
-		Request   []byte
-		Error     error
+		Body      string `json:"body"`
+		OldBody   string `json:"old_body"`
+		Request   []byte `json:"request"`
+		Error     error  `json:"error"`
 	}
 
 	MessageParser interface {
 		ParseFromBytes(data []byte) error
 		AddSubject(subj string)
+		ToJSON() (string, error)
 	}
 )
 
@@ -148,4 +149,17 @@ func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
 
 func (n *NatsEventMessage) AddSubject(subj string) {
 	n.NatsEvent.Subject = subj
+}
+
+// ToJSON marshal message to JSON format
+func (n *NatsEventMessage) ToJSON() (string, error) {
+	bt, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	return string(bt), err
+}
+
+// ParseJSON parse JSON into message
+func ParseJSON(in string) (*NatsEventMessage, error) {
+	msg := &NatsEventMessage{}
+	err := tapao.Unmarshal([]byte(in), msg, tapao.With(tapao.JSON))
+	return msg, err
 }
