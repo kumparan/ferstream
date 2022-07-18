@@ -8,6 +8,7 @@ import (
 	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNatsEventMessage_WithEvent(t *testing.T) {
@@ -175,4 +176,38 @@ func TestNatsEventMessage_Build(t *testing.T) {
 			assert.Nil(t, message)
 		}
 	})
+}
+
+func TestNatsEventMessage_ToJSON(t *testing.T) {
+	natsEvent := &NatsEvent{
+		ID:     123,
+		UserID: 333,
+	}
+	body := []string{"test"}
+
+	msg := NewNatsEventMessage().
+		WithEvent(natsEvent).
+		WithBody(body)
+
+	parsed, err := msg.ToJSON()
+	require.NoError(t, err)
+
+	expectedRes := "{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+	assert.Equal(t, expectedRes, parsed)
+}
+
+func TestNatsEventMessage_ParseJSON(t *testing.T) {
+	json := "{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+
+	natsEvent := &NatsEvent{
+		ID:     123,
+		UserID: 333,
+	}
+	body := []string{"test"}
+	msg := NewNatsEventMessage().WithEvent(natsEvent).WithBody(body)
+
+	parsed, err := ParseJSON(json)
+	require.NoError(t, err)
+
+	assert.Equal(t, msg, parsed)
 }
