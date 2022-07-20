@@ -15,6 +15,7 @@ type (
 		QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
 		Close()
 		AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error)
+		ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error)
 	}
 
 	// jsImpl JetStream implementation
@@ -23,8 +24,24 @@ type (
 		jsCtx    nats.JetStreamContext
 	}
 
+	// JetStreamRegistration
+	JetStreamRegistration interface {
+		RegisterNATSJetStream(js JetStream)
+	}
+
+	// StreamRegistration
+	StreamRegistration interface {
+		InitStream() error
+	}
+
+	// Subscription
+	Subscription interface {
+		SubscribeJetStreamEvent() error
+	}
+
 	// Message Handler :nodoc:
 	MessageHandler func(payload MessageParser) (err error)
+	JSCallback     func(js JetStream) error
 )
 
 // NewNATSConnection :nodoc:
@@ -49,6 +66,26 @@ func NewNATSConnection(url string, natsOpts ...nats.Option) (JetStream, error) {
 	}
 
 	return impl, nil
+}
+
+// RegisterJetStreamClient provide jetstream instance, stream, and subscription registration
+func RegisterJetStreamClient(js JetStream, clients []JetStreamRegistration) error {
+	for _, client := range clients {
+		client.RegisterNATSJetStream(js)
+		if streamRegis, ok := client.(StreamRegistration); ok {
+			err := streamRegis.InitStream()
+			if err != nil {
+				return err
+			}
+		}
+		if subscription, ok := client.(Subscription); ok {
+			err := subscription.SubscribeJetStreamEvent()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // NewNATSMessageHandler a wrapper to standardize how we handle NATS messages.
@@ -150,4 +187,13 @@ func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.St
 
 	return j.jsCtx.UpdateStream(cfg)
 
+}
+
+// ConsumerInfo
+func (j *jsImpl) ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+	if !j.checkConnIsValid() {
+		return nil, ErrConnectionLost
+	}
+
+	return j.jsCtx.ConsumerInfo(streamName, consumerName, opts...)
 }

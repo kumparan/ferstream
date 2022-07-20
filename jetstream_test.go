@@ -10,6 +10,7 @@ import (
 	natsserver "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const defaultURL = "nats://127.0.0.1:4222"
@@ -152,4 +153,35 @@ func TestAddStream(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestConsumerInfo(t *testing.T) {
+	n, err := NewNATSConnection(defaultURL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer n.Close()
+
+	updateConf := &nats.StreamConfig{
+		Name:     "STREAM_NAME",
+		Subjects: []string{"STREAM_EVENT.*"},
+		MaxAge:   2 * time.Hour,
+		Storage:  nats.FileStorage,
+	}
+
+	_, err = n.AddStream(updateConf)
+	require.NoError(t, err)
+
+	_, err = n.QueueSubscribe("STREAM_EVENT.A", "QUEUEUEUE", func(msg *nats.Msg) {}, nats.Durable("DURABLE_NAME"))
+	require.NoError(t, err)
+
+	consumerInfo, err := n.ConsumerInfo("STREAM_NAME", "DURABLE_NAME")
+	assert.NotNil(t, consumerInfo)
+	require.NoError(t, err)
+
+	consumerInfo2, err := n.ConsumerInfo("STREAM_NAME", "DURABLE_NAME2")
+	require.Error(t, err)
+	assert.Nil(t, consumerInfo2)
+	assert.Equal(t, nats.ErrConsumerNotFound, err)
+
 }
