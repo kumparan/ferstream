@@ -178,7 +178,7 @@ func TestNatsEventMessage_Build(t *testing.T) {
 	})
 }
 
-func TestNatsEventMessage_ToJSON(t *testing.T) {
+func TestNatsEventMessage_ToJSONString(t *testing.T) {
 	natsEvent := &NatsEvent{
 		ID:     123,
 		UserID: 333,
@@ -189,11 +189,31 @@ func TestNatsEventMessage_ToJSON(t *testing.T) {
 		WithEvent(natsEvent).
 		WithBody(body)
 
-	parsed, err := msg.ToJSON()
+	parsed, err := msg.ToJSONString()
 	require.NoError(t, err)
 
 	expectedRes := "{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
 	assert.Equal(t, expectedRes, parsed)
+}
+
+func TestNatsEventMessage_ToJSONByte(t *testing.T) {
+	natsEvent := &NatsEvent{
+		ID:     123,
+		UserID: 333,
+	}
+	body := []string{"test"}
+
+	msg := NewNatsEventMessage().
+		WithEvent(natsEvent).
+		WithBody(body)
+
+	jsonByte, err := msg.ToJSONByte()
+	require.NoError(t, err)
+
+	parsed, err := ParseJSON(string(jsonByte))
+	require.NoError(t, err)
+
+	assert.Equal(t, parsed, msg)
 }
 
 func TestNatsEventMessage_ParseJSON(t *testing.T) {

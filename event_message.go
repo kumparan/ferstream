@@ -29,7 +29,8 @@ type (
 	MessageParser interface {
 		ParseFromBytes(data []byte) error
 		AddSubject(subj string)
-		ToJSON() (string, error)
+		ToJSONString() (string, error)
+		ToJSONByte() ([]byte, error)
 	}
 )
 
@@ -151,10 +152,15 @@ func (n *NatsEventMessage) AddSubject(subj string) {
 	n.NatsEvent.Subject = subj
 }
 
-// ToJSON marshal message to JSON format
-func (n *NatsEventMessage) ToJSON() (string, error) {
+// ToJSONString marshal message to JSON string
+func (n *NatsEventMessage) ToJSONString() (string, error) {
 	bt, err := tapao.Marshal(n, tapao.With(tapao.JSON))
 	return string(bt), err
+}
+
+// ToJSONByte marshal message to JSON byte
+func (n *NatsEventMessage) ToJSONByte() ([]byte, error) {
+	return tapao.Marshal(n, tapao.With(tapao.JSON))
 }
 
 // ParseJSON parse JSON into message

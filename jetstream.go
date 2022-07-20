@@ -15,12 +15,28 @@ type (
 		QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
 		Close()
 		AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error)
+		ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error)
 	}
 
 	// jsImpl JetStream implementation
 	jsImpl struct {
 		natsConn *nats.Conn
 		jsCtx    nats.JetStreamContext
+	}
+
+	// JetStreamRegistrar
+	JetStreamRegistrar interface {
+		RegisterNATSJetStream(js JetStream)
+	}
+
+	// StreamRegistration
+	StreamRegistrar interface {
+		InitStream() error
+	}
+
+	// Subscriber
+	Subscriber interface {
+		SubscribeJetStreamEvent() error
 	}
 
 	// Message Handler :nodoc:
@@ -49,6 +65,26 @@ func NewNATSConnection(url string, natsOpts ...nats.Option) (JetStream, error) {
 	}
 
 	return impl, nil
+}
+
+// RegisterJetStreamClient provide jetstream instance, stream, and subscription registration
+func RegisterJetStreamClient(js JetStream, clients []JetStreamRegistrar) error {
+	for _, client := range clients {
+		client.RegisterNATSJetStream(js)
+		if streamRegistrar, ok := client.(StreamRegistrar); ok {
+			err := streamRegistrar.InitStream()
+			if err != nil {
+				return err
+			}
+		}
+		if subscriber, ok := client.(Subscriber); ok {
+			err := subscriber.SubscribeJetStreamEvent()
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 // NewNATSMessageHandler a wrapper to standardize how we handle NATS messages.
@@ -150,4 +186,13 @@ func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.St
 
 	return j.jsCtx.UpdateStream(cfg)
 
+}
+
+// ConsumerInfo
+func (j *jsImpl) ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+	if !j.checkConnIsValid() {
+		return nil, ErrConnectionLost
+	}
+
+	return j.jsCtx.ConsumerInfo(streamName, consumerName, opts...)
 }
