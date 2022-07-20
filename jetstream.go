@@ -24,24 +24,23 @@ type (
 		jsCtx    nats.JetStreamContext
 	}
 
-	// JetStreamRegistration
-	JetStreamRegistration interface {
+	// JetStreamRegistrar
+	JetStreamRegistrar interface {
 		RegisterNATSJetStream(js JetStream)
 	}
 
 	// StreamRegistration
-	StreamRegistration interface {
+	StreamRegistrar interface {
 		InitStream() error
 	}
 
-	// Subscription
-	Subscription interface {
+	// Subscriber
+	Subscriber interface {
 		SubscribeJetStreamEvent() error
 	}
 
 	// Message Handler :nodoc:
 	MessageHandler func(payload MessageParser) (err error)
-	JSCallback     func(js JetStream) error
 )
 
 // NewNATSConnection :nodoc:
@@ -69,17 +68,17 @@ func NewNATSConnection(url string, natsOpts ...nats.Option) (JetStream, error) {
 }
 
 // RegisterJetStreamClient provide jetstream instance, stream, and subscription registration
-func RegisterJetStreamClient(js JetStream, clients []JetStreamRegistration) error {
+func RegisterJetStreamClient(js JetStream, clients []JetStreamRegistrar) error {
 	for _, client := range clients {
 		client.RegisterNATSJetStream(js)
-		if streamRegis, ok := client.(StreamRegistration); ok {
-			err := streamRegis.InitStream()
+		if streamRegistrar, ok := client.(StreamRegistrar); ok {
+			err := streamRegistrar.InitStream()
 			if err != nil {
 				return err
 			}
 		}
-		if subscription, ok := client.(Subscription); ok {
-			err := subscription.SubscribeJetStreamEvent()
+		if subscriber, ok := client.(Subscriber); ok {
+			err := subscriber.SubscribeJetStreamEvent()
 			if err != nil {
 				return err
 			}
