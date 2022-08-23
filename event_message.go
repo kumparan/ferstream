@@ -87,7 +87,7 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 	}
 
 	if n.NatsEvent == nil {
-		n.wrapError(errors.New("empty nats nats event"))
+		n.wrapError(errors.New("empty nats event"))
 		return nil, n.Error
 	}
 
