@@ -179,21 +179,39 @@ func TestNatsEventMessage_Build(t *testing.T) {
 }
 
 func TestNatsEventMessage_ToJSONString(t *testing.T) {
-	natsEvent := &NatsEvent{
-		ID:     123,
-		UserID: 333,
-	}
-	body := []string{"test"}
+	t.Run("success", func(t *testing.T) {
+		natsEvent := &NatsEvent{
+			ID:     123,
+			UserID: 333,
+		}
+		body := []string{"test"}
 
-	msg := NewNatsEventMessage().
-		WithEvent(natsEvent).
-		WithBody(body)
+		msg := NewNatsEventMessage().
+			WithEvent(natsEvent).
+			WithBody(body)
 
-	parsed, err := msg.ToJSONString()
-	require.NoError(t, err)
+		parsed, err := msg.ToJSONString()
+		require.NoError(t, err)
+		expectedRes := "{\"NatsEvent\":{\"id\":123,\"id_string\":\"\",\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+		assert.Equal(t, expectedRes, parsed)
+	})
 
-	expectedRes := "{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
-	assert.Equal(t, expectedRes, parsed)
+	t.Run("success with IDString", func(t *testing.T) {
+		natsEvent := &NatsEvent{
+			UserID:   333,
+			IDString: "630484ae00f0d71df588a0ab",
+		}
+		body := []string{"test"}
+
+		msg := NewNatsEventMessage().
+			WithEvent(natsEvent).
+			WithBody(body)
+
+		parsed, err := msg.ToJSONString()
+		require.NoError(t, err)
+		expectedRes := "{\"NatsEvent\":{\"id\":0,\"id_string\":\"630484ae00f0d71df588a0ab\",\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+		assert.Equal(t, expectedRes, parsed)
+	})
 }
 
 func TestNatsEventMessage_ToJSONByte(t *testing.T) {
