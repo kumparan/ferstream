@@ -12,7 +12,7 @@ type (
 	// NatsEvent :nodoc:
 	NatsEvent struct {
 		ID       int64  `json:"id"`
-		IDStr    string `json:"id_str"`
+		IDString string `json:"id_string"`
 		UserID   int64  `json:"user_id"`
 		TenantID int64  `json:"tenant_id"`
 		Subject  string `json:"subject"` // empty on publish
@@ -67,12 +67,12 @@ func (n *NatsEvent) GetSubject() string {
 	return n.Subject
 }
 
-// GetIDStr :nodoc:
-func (n *NatsEvent) GetIDStr() string {
+// GetIDString :nodoc:
+func (n *NatsEvent) GetIDString() string {
 	if n == nil {
 		return ""
 	}
-	return n.IDStr
+	return n.IDString
 }
 
 // NewNatsEventMessage :nodoc:
@@ -102,7 +102,7 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 
 // WithEvent :nodoc:
 func (n *NatsEventMessage) WithEvent(e *NatsEvent) *NatsEventMessage {
-	if e.GetID() <= 0 && e.GetIDStr() == "" {
+	if e.GetID() <= 0 && e.GetIDString() == "" {
 		n.wrapError(errors.New("empty id"))
 		return n
 	}
