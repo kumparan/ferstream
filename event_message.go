@@ -1,9 +1,9 @@
 package ferstream
 
 import (
+	"github.com/kumparan/go-utils"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/kumparan/go-utils"
 	"github.com/kumparan/tapao"
 	"github.com/pkg/errors"
 )
@@ -12,6 +12,7 @@ type (
 	// NatsEvent :nodoc:
 	NatsEvent struct {
 		ID       int64  `json:"id"`
+		IDStr    string `json:"id_str"`
 		UserID   int64  `json:"user_id"`
 		TenantID int64  `json:"tenant_id"`
 		Subject  string `json:"subject"` // empty on publish
@@ -66,6 +67,14 @@ func (n *NatsEvent) GetSubject() string {
 	return n.Subject
 }
 
+// GetIDStr :nodoc:
+func (n *NatsEvent) GetIDStr() string {
+	if n == nil {
+		return ""
+	}
+	return n.IDStr
+}
+
 // NewNatsEventMessage :nodoc:
 func NewNatsEventMessage() *NatsEventMessage {
 	return &NatsEventMessage{}
@@ -93,7 +102,7 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 
 // WithEvent :nodoc:
 func (n *NatsEventMessage) WithEvent(e *NatsEvent) *NatsEventMessage {
-	if e.GetID() <= 0 {
+	if e.GetID() <= 0 && e.GetIDStr() == "" {
 		n.wrapError(errors.New("empty id"))
 		return n
 	}

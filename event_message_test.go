@@ -192,7 +192,7 @@ func TestNatsEventMessage_ToJSONString(t *testing.T) {
 	parsed, err := msg.ToJSONString()
 	require.NoError(t, err)
 
-	expectedRes := "{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+	expectedRes := "{\"NatsEvent\":{\"id\":123,\"id_str\":\"\",\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
 	assert.Equal(t, expectedRes, parsed)
 }
 
