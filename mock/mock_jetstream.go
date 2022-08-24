@@ -66,6 +66,26 @@ func (mr *MockJetStreamMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockJetStream)(nil).Close))
 }
 
+// ConsumerInfo mocks base method.
+func (m *MockJetStream) ConsumerInfo(arg0, arg1 string, arg2 ...nats.JSOpt) (*nats.ConsumerInfo, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ConsumerInfo", varargs...)
+	ret0, _ := ret[0].(*nats.ConsumerInfo)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ConsumerInfo indicates an expected call of ConsumerInfo.
+func (mr *MockJetStreamMockRecorder) ConsumerInfo(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumerInfo", reflect.TypeOf((*MockJetStream)(nil).ConsumerInfo), varargs...)
+}
+
 // Publish mocks base method.
 func (m *MockJetStream) Publish(arg0 string, arg1 []byte, arg2 ...nats.PubOpt) (*nats.PubAck, error) {
 	m.ctrl.T.Helper()
