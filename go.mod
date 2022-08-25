@@ -8,7 +8,7 @@ require (
 	github.com/nats-io/nats.go v1.16.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	google.golang.org/protobuf v1.26.0
 )
 
@@ -22,9 +22,10 @@ require (
 	github.com/gorilla/css v1.0.0 // indirect
 	github.com/klauspost/compress v1.13.4 // indirect
 	github.com/leekchan/accounting v0.3.1 // indirect
-	github.com/microcosm-cc/bluemonday v1.0.7 // indirect
+	github.com/microcosm-cc/bluemonday v1.0.19 // indirect
 	github.com/minio/highwayhash v1.0.1 // indirect
 	github.com/nats-io/jwt/v2 v2.2.1-0.20220113022732-58e87895b296 // indirect
+	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	golang.org/x/sys v0.0.0-20220111092808-5a964db01320 // indirect
@@ -34,12 +35,11 @@ require (
 )
 
 require (
-	github.com/graph-gophers/graphql-go v0.0.0-20181128220952-0079757a4d96 // indirect
-	github.com/kumparan/go-utils v1.19.0
+	github.com/graph-gophers/graphql-go v1.4.0 // indirect
+	github.com/kumparan/go-utils v1.25.1
 	github.com/nats-io/nats-server/v2 v2.7.0
 	github.com/nats-io/nkeys v0.3.0 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/opentracing/opentracing-go v1.0.2 // indirect
 	github.com/vmihailenco/msgpack v4.0.3+incompatible // indirect
 	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
