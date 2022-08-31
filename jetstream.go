@@ -124,6 +124,10 @@ func NewNATSMessageHandler(payload MessageParser, retryAttempts int, retryInterv
 			"cause":   ErrGiveUpProcessingMessagePayload,
 		}).Error(retryErr)
 
+		if errHandler == nil {
+			return
+		}
+
 		// hand over to error handler
 		logrus.WithField("payload", utils.Dump(payload)).Warnf("handling ErrGiveUpProcessingMessagePayload")
 		err = errHandler(payload)
