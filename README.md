@@ -74,12 +74,14 @@ func (s *JSSubscriber) SubscribeJetStreamEvent() error {
 	errHandler := func (payload ferstream.MessageParser) error {
 		// something you want to do if the msgHandler returns an error
 	}
-	s.js.QueueSubscribe("SUBJECT", "your-queue-group", 
-	    _, err := ferstream.NewNATSMessageHandler(new(ferstream.NatsEventMessage), retryAttempts, retryInterval, msgHandler, errHandler)
-            if err != nil {
-                // handle err
-            }
+	natsSubOpts := []nats.SubOpt{nats.ManualAck(), nats.Durable(config.NatsDurableID)}
+	_, err := s.js.QueueSubscribe("SUBJECT", "your-queue-group", 
+	    ferstream.NewNATSMessageHandler(new(ferstream.NatsEventMessage), retryAttempts, retryInterval, msgHandler, errHandler, natsSubOpts)
+            natsSubOpts...
         )
+	if err != nil {
+		log.Fatal(err)
+	}   
 }
 ```
 - **Register Clients**
