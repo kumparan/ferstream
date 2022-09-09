@@ -52,7 +52,7 @@ func (s *JSSubscriber) InitStream() error {
 	// you can do anything you need here before adding stream
 	_, err := p.js.AddStream(&nats.StreamConfig{
 	    Name: "YOUR_STREAM_NAME",
-		Subject: []string{"YOUR_STREAM_NAME.>"},
+		Subject: []string{"SUBJECT"},
 		StreamMaxAge: tima.Hour * 24,
 		Storage: nats.FileStorage,
 	})
@@ -74,7 +74,7 @@ func (s *JSSubscriber) SubscribeJetStreamEvent() error {
 	errHandler := func (payload ferstream.MessageParser) error {
 		// something you want to do if the msgHandler returns an error
 	}
-	s.js.QueueSubscribe("YOUR_STREAM_NAME.>", "your-queue-group", 
+	s.js.QueueSubscribe("SUBJECT", "your-queue-group", 
 	    _, err := ferstream.NewNATSMessageHandler(new(ferstream.NatsEventMessage), retryAttempts, retryInterval, msgHandler, errHandler)
             if err != nil {
                 // handle err
