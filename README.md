@@ -29,7 +29,7 @@ func (p *JSPublisher) InitStream() error {
 	// you can do anything you need here before adding stream
 	_, err := p.js.AddStream(&nats.StreamConfig{
 	    Name: "YOUR_STREAM_NAME",
-		Subject: []string{"YOUR_STREAM_NAME.>"},
+		Subject: []string{"SUBJECT"},
 		StreamMaxAge: tima.Hour * 24,
 		Storage: nats.FileStorage,
 	})
