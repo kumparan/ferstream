@@ -74,7 +74,7 @@ func (s *JSSubscriber) SubscribeJetStreamEvent() error {
 	errHandler := func (payload ferstream.MessageParser) error {
 		// something you want to do if the msgHandler returns an error
 	}
-	natsSubOpts := []nats.SubOpt{nats.ManualAck(), nats.Durable(config.NatsDurableID)}
+	natsSubOpts := []nats.SubOpt{nats.ManualAck(), nats.Durable("your-durable-id")}
 	_, err := s.js.QueueSubscribe("SUBJECT", "your-queue-group", 
 	    ferstream.NewNATSMessageHandler(new(ferstream.NatsEventMessage), retryAttempts, retryInterval, msgHandler, errHandler, natsSubOpts)
             natsSubOpts...
