@@ -30,7 +30,7 @@ func (p *JSPublisher) InitStream() error {
 	_, err := p.js.AddStream(&nats.StreamConfig{
 	    Name: "YOUR_STREAM_NAME",
 		Subject: []string{"SUBJECT"},
-		StreamMaxAge: tima.Hour * 24,
+		StreamMaxAge: time.Hour * 24,
 		Storage: nats.FileStorage,
 	})
 	if err != nil {
@@ -53,7 +53,7 @@ func (s *JSSubscriber) InitStream() error {
 	_, err := p.js.AddStream(&nats.StreamConfig{
 	    Name: "YOUR_STREAM_NAME",
 		Subject: []string{"SUBJECT"},
-		StreamMaxAge: tima.Hour * 24,
+		StreamMaxAge: time.Hour * 24,
 		Storage: nats.FileStorage,
 	})
 	if err != nil {
