@@ -1,6 +1,8 @@
 package ferstream
 
 import (
+	"time"
+
 	"github.com/kumparan/go-utils"
 	"google.golang.org/protobuf/proto"
 
@@ -27,6 +29,22 @@ type (
 		Error     error  `json:"error"`
 	}
 
+	// NatsEventAuditLogMessage :nodoc:
+	NatsEventAuditLogMessage struct {
+		Subject        string    `json:"subject"` // empty on publish
+		ServiceName    string    `json:"service_name"`
+		UserID         int64     `json:"user_id"`
+		AuditableType  string    `json:"auditable_type"`
+		AuditableID    string    `json:"auditable_id"`
+		Action         string    `json:"action"`
+		AuditedChanges string    `json:"audited_changes"`
+		OldData        string    `json:"old_data,omitempty"`
+		NewData        string    `json:"new_data,omitempty"`
+		CreatedAt      time.Time `json:"created_at"`
+		Error          error     `json:"error"`
+	}
+
+	// MessageParser :nodoc:
 	MessageParser interface {
 		ParseFromBytes(data []byte) error
 		AddSubject(subj string)
@@ -91,7 +109,7 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 		return nil, n.Error
 	}
 
-	message, err := tapao.Marshal(n)
+	message, err := tapao.Marshal(n, tapao.With(tapao.JSON))
 	if err != nil {
 		n.wrapError(err)
 		return nil, n.Error
@@ -148,8 +166,9 @@ func (n *NatsEventMessage) wrapError(err error) {
 	n.Error = err
 }
 
+// ParseFromBytes :nodoc:
 func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
-	err = tapao.Unmarshal(data, &n, tapao.FallbackWith(tapao.JSON))
+	err = tapao.Unmarshal(data, &n, tapao.With(tapao.JSON))
 	if err != nil {
 		n.Error = errors.Wrap(n.Error, err.Error())
 		return err
@@ -157,6 +176,7 @@ func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
 	return
 }
 
+// AddSubject :nodoc:
 func (n *NatsEventMessage) AddSubject(subj string) {
 	n.NatsEvent.Subject = subj
 }
@@ -172,9 +192,65 @@ func (n *NatsEventMessage) ToJSONByte() ([]byte, error) {
 	return tapao.Marshal(n, tapao.With(tapao.JSON))
 }
 
-// ParseJSON parse JSON into message
+// Build :nodoc:
+func (n *NatsEventAuditLogMessage) Build() (data []byte, err error) {
+	if n.Error != nil {
+		return nil, n.Error
+	}
+
+	message, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	if err != nil {
+		n.wrapError(err)
+		return nil, n.Error
+	}
+
+	return message, nil
+}
+
+// ParseFromBytes :nodoc:
+func (n *NatsEventAuditLogMessage) ParseFromBytes(data []byte) (err error) {
+	err = tapao.Unmarshal(data, &n, tapao.With(tapao.JSON))
+	if err != nil {
+		n.Error = errors.Wrap(n.Error, err.Error())
+		return err
+	}
+	return
+}
+
+// AddSubject :nodoc:
+func (n *NatsEventAuditLogMessage) AddSubject(subj string) {
+	n.Subject = subj
+}
+
+// ToJSONString marshal message to JSON string
+func (n *NatsEventAuditLogMessage) ToJSONString() (string, error) {
+	bt, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	return string(bt), err
+}
+
+// ToJSONByte marshal message to JSON byte
+func (n *NatsEventAuditLogMessage) ToJSONByte() ([]byte, error) {
+	return tapao.Marshal(n, tapao.With(tapao.JSON))
+}
+
+func (n *NatsEventAuditLogMessage) wrapError(err error) {
+	if n.Error != nil {
+		n.Error = errors.Wrap(n.Error, err.Error())
+		return
+	}
+	n.Error = err
+}
+
+// ParseJSON parse JSON into Nats event message
 func ParseJSON(in string) (*NatsEventMessage, error) {
 	msg := &NatsEventMessage{}
 	err := tapao.Unmarshal([]byte(in), msg, tapao.With(tapao.JSON))
+	return msg, err
+}
+
+// ParseNatsEventAuditLogMessageFromBytes :nodoc:
+func ParseNatsEventAuditLogMessageFromBytes(in []byte) (*NatsEventAuditLogMessage, error) {
+	msg := &NatsEventAuditLogMessage{}
+	err := tapao.Unmarshal(in, msg, tapao.With(tapao.JSON))
 	return msg, err
 }

@@ -1,6 +1,7 @@
 package ferstream
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -83,7 +84,7 @@ func TestNatsEventMessage_WithRequest(t *testing.T) {
 	assert.NoError(t, result.Error)
 
 	var requestResult pb.FindByIDRequest
-	err := tapao.Unmarshal(result.Request, &requestResult, tapao.FallbackWith(tapao.Protobuf))
+	err := tapao.Unmarshal(result.Request, &requestResult, tapao.With(tapao.Protobuf))
 	assert.NoError(t, err)
 	assert.Equal(t, body.Id, requestResult.GetId())
 }
@@ -113,14 +114,14 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.NotNil(t, message)
 
 		var result NatsEventMessage
-		err = tapao.Unmarshal(message, &result, tapao.FallbackWith(tapao.JSON))
+		err = tapao.Unmarshal(message, &result, tapao.With(tapao.JSON))
 		assert.NoError(t, err)
 		assert.Equal(t, event.ID, result.NatsEvent.ID)
 		assert.Equal(t, event.UserID, result.NatsEvent.UserID)
 		assert.Equal(t, utils.Dump(body), result.Body)
 
 		var requestResult pb.Greeting
-		err = tapao.Unmarshal(result.Request, &requestResult, tapao.FallbackWith(tapao.Protobuf))
+		err = tapao.Unmarshal(result.Request, &requestResult, tapao.With(tapao.Protobuf))
 		assert.NoError(t, err)
 		assert.Equal(t, req.Id, requestResult.Id)
 		assert.Equal(t, req.Name, requestResult.Name)
@@ -139,7 +140,7 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.NotNil(t, message)
 
 		var result NatsEventMessage
-		err = tapao.Unmarshal(message, &result, tapao.FallbackWith(tapao.JSON))
+		err = tapao.Unmarshal(message, &result, tapao.With(tapao.JSON))
 		assert.NoError(t, err)
 		assert.Equal(t, event.ID, result.NatsEvent.ID)
 		assert.Equal(t, event.UserID, result.NatsEvent.UserID)
@@ -147,7 +148,7 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.Equal(t, utils.Dump(oldBody), result.OldBody)
 
 		var requestResult pb.Greeting
-		err = tapao.Unmarshal(result.Request, &requestResult, tapao.FallbackWith(tapao.Protobuf))
+		err = tapao.Unmarshal(result.Request, &requestResult, tapao.With(tapao.Protobuf))
 		assert.NoError(t, err)
 		assert.Equal(t, req.Id, requestResult.Id)
 		assert.Equal(t, req.Name, requestResult.Name)
@@ -245,6 +246,191 @@ func TestNatsEventMessage_ParseJSON(t *testing.T) {
 	msg := NewNatsEventMessage().WithEvent(natsEvent).WithBody(body)
 
 	parsed, err := ParseJSON(json)
+	require.NoError(t, err)
+
+	assert.Equal(t, msg, parsed)
+}
+
+func TestNatsEventAuditLogMessage_Build(t *testing.T) {
+	type User struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	oldData := User{
+		ID:   int64(123),
+		Name: "test name",
+	}
+
+	newData := User{
+		ID:   int64(123),
+		Name: "new test name",
+	}
+
+	byteOldData, err := json.Marshal(oldData)
+	require.NoError(t, err)
+	byteNewData, err := json.Marshal(newData)
+	require.NoError(t, err)
+
+	createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+	require.NoError(t, err)
+
+	t.Run("success", func(t *testing.T) {
+		msg := &NatsEventAuditLogMessage{
+			ServiceName:    "test-audit",
+			UserID:         123,
+			AuditableType:  "user",
+			AuditableID:    "123",
+			Action:         "update",
+			AuditedChanges: string(byteNewData),
+			OldData:        string(byteOldData),
+			NewData:        string(byteNewData),
+			CreatedAt:      createdAt,
+			Error:          nil,
+		}
+
+		msgByte, err := msg.Build()
+		require.NoError(t, err)
+		assert.NotNil(t, msgByte)
+
+		var result NatsEventAuditLogMessage
+		err = tapao.Unmarshal(msgByte, &result, tapao.With(tapao.JSON))
+		assert.NoError(t, err)
+		assert.Equal(t, msg.ServiceName, result.ServiceName)
+		assert.Equal(t, msg.OldData, result.OldData)
+		assert.Equal(t, msg.NewData, result.NewData)
+	})
+}
+
+func TestNatsEventAuditLogMessage_ToJSONString(t *testing.T) {
+	type User struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	oldData := User{
+		ID:   int64(123),
+		Name: "test name",
+	}
+
+	newData := User{
+		ID:   int64(123),
+		Name: "new test name",
+	}
+
+	byteOldData, err := json.Marshal(oldData)
+	require.NoError(t, err)
+	byteNewData, err := json.Marshal(newData)
+	require.NoError(t, err)
+
+	createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+	require.NoError(t, err)
+
+	msg := &NatsEventAuditLogMessage{
+		ServiceName:    "test-audit",
+		UserID:         123,
+		AuditableType:  "user",
+		AuditableID:    "123",
+		Action:         "update",
+		AuditedChanges: string(byteNewData),
+		OldData:        string(byteOldData),
+		NewData:        string(byteNewData),
+		CreatedAt:      createdAt,
+		Error:          nil,
+	}
+
+	parsed, err := msg.ToJSONString()
+	require.NoError(t, err)
+	expectedRes := "{\"subject\":\"\",\"service_name\":\"test-audit\",\"user_id\":123,\"auditable_type\":\"user\",\"auditable_id\":\"123\",\"action\":\"update\",\"audited_changes\":\"{\\\"id\\\":123,\\\"name\\\":\\\"new test name\\\"}\",\"old_data\":\"{\\\"id\\\":123,\\\"name\\\":\\\"test name\\\"}\",\"new_data\":\"{\\\"id\\\":123,\\\"name\\\":\\\"new test name\\\"}\",\"created_at\":\"2020-01-29T00:00:00Z\",\"error\":null}"
+	assert.Equal(t, expectedRes, parsed)
+}
+
+func TestNatsEventAuditLogMessage_ToJSONByte(t *testing.T) {
+	type User struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	oldData := User{
+		ID:   int64(123),
+		Name: "test name",
+	}
+
+	newData := User{
+		ID:   int64(123),
+		Name: "new test name",
+	}
+
+	byteOldData, err := json.Marshal(oldData)
+	require.NoError(t, err)
+	byteNewData, err := json.Marshal(newData)
+	require.NoError(t, err)
+
+	createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+	require.NoError(t, err)
+
+	msg := &NatsEventAuditLogMessage{
+		ServiceName:    "test-audit",
+		UserID:         123,
+		AuditableType:  "user",
+		AuditableID:    "123",
+		Action:         "update",
+		AuditedChanges: string(byteNewData),
+		OldData:        string(byteOldData),
+		NewData:        string(byteNewData),
+		CreatedAt:      createdAt,
+		Error:          nil,
+	}
+
+	jsonByte, err := msg.ToJSONByte()
+	require.NoError(t, err)
+
+	parsed, err := ParseNatsEventAuditLogMessageFromBytes(jsonByte)
+	require.NoError(t, err)
+
+	assert.Equal(t, parsed, msg)
+}
+
+func TestNatsEventAuditLogMessage_ParseNatsEventAuditLogMessageFromBytes(t *testing.T) {
+	payload := "{\"subject\":\"\",\"service_name\":\"test-audit\",\"user_id\":123,\"auditable_type\":\"user\",\"auditable_id\":\"123\",\"action\":\"update\",\"audited_changes\":\"{\\\"id\\\":123,\\\"name\\\":\\\"new test name\\\"}\",\"old_data\":\"{\\\"id\\\":123,\\\"name\\\":\\\"test name\\\"}\",\"new_data\":\"{\\\"id\\\":123,\\\"name\\\":\\\"new test name\\\"}\",\"created_at\":\"2020-01-29T00:00:00Z\",\"error\":null}"
+
+	type User struct {
+		ID   int64  `json:"id"`
+		Name string `json:"name"`
+	}
+
+	oldData := User{
+		ID:   int64(123),
+		Name: "test name",
+	}
+
+	newData := User{
+		ID:   int64(123),
+		Name: "new test name",
+	}
+
+	byteOldData, err := json.Marshal(oldData)
+	require.NoError(t, err)
+	byteNewData, err := json.Marshal(newData)
+	require.NoError(t, err)
+
+	createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+	require.NoError(t, err)
+
+	msg := &NatsEventAuditLogMessage{
+		ServiceName:    "test-audit",
+		UserID:         123,
+		AuditableType:  "user",
+		AuditableID:    "123",
+		Action:         "update",
+		AuditedChanges: string(byteNewData),
+		OldData:        string(byteOldData),
+		NewData:        string(byteNewData),
+		CreatedAt:      createdAt,
+		Error:          nil,
+	}
+
+	parsed, err := ParseNatsEventAuditLogMessageFromBytes([]byte(payload))
 	require.NoError(t, err)
 
 	assert.Equal(t, msg, parsed)
