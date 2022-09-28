@@ -17,6 +17,7 @@ type (
 		IDString string `json:"id_string"`
 		UserID   int64  `json:"user_id"`
 		TenantID int64  `json:"tenant_id"`
+		Time     string `json:"time"`
 		Subject  string `json:"subject"` // empty on publish
 	}
 
@@ -91,6 +92,14 @@ func (n *NatsEvent) GetIDString() string {
 		return ""
 	}
 	return n.IDString
+}
+
+// GetTime :nodoc:
+func (n *NatsEvent) GetTime() string {
+	if n == nil {
+		return ""
+	}
+	return n.Time
 }
 
 // NewNatsEventMessage :nodoc:
