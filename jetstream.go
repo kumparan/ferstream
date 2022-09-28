@@ -24,22 +24,22 @@ type (
 		jsCtx    nats.JetStreamContext
 	}
 
-	// JetStreamRegistrar
+	// JetStreamRegistrar :nodoc:
 	JetStreamRegistrar interface {
 		RegisterNATSJetStream(js JetStream)
 	}
 
-	// StreamRegistration
+	// StreamRegistrar :nodoc:
 	StreamRegistrar interface {
 		InitStream() error
 	}
 
-	// Subscriber
+	// Subscriber :nodoc:
 	Subscriber interface {
 		SubscribeJetStreamEvent() error
 	}
 
-	// Message Handler :nodoc:
+	// MessageHandler :nodoc:
 	MessageHandler func(payload MessageParser) (err error)
 )
 

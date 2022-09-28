@@ -1,6 +1,7 @@
 package ferstream
 
 import (
+	"encoding/json"
 	"log"
 	"os"
 	"testing"
@@ -62,60 +63,150 @@ func TestPublish(t *testing.T) {
 }
 
 func TestQueueSubscribe(t *testing.T) {
-	n, err := NewNATSConnection(defaultURL)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer func() {
-		n.Close()
-	}()
-
-	streamConf := &nats.StreamConfig{
-		Name:     "STREAM_NAME_ANOTHER",
-		Subjects: []string{"STREAM_EVENT_ANOTHER.*"},
-		MaxAge:   1 * time.Hour,
-		Storage:  nats.FileStorage,
-	}
-
-	_, err = n.AddStream(streamConf)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	countMsg := 10
-	subject := "STREAM_EVENT_ANOTHER.TEST"
-	queue := "test_queue_group"
-
-	msgBytes, err := NewNatsEventMessage().WithEvent(&NatsEvent{
-		ID:     int64(1232),
-		UserID: int64(21),
-	}).Build()
-
-	assert.NoError(t, err)
-
-	for i := 0; i < countMsg; i++ {
-		_, err = n.Publish(subject, msgBytes)
+	t.Run("queue subscribe NatsEventMessage", func(t *testing.T) {
+		n, err := NewNATSConnection(defaultURL)
 		if err != nil {
 			t.Fatal(err)
 		}
-	}
+		defer func() {
+			n.Close()
+		}()
 
-	receiverCh := make(chan *nats.Msg)
-	sub, err := n.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
-		receiverCh <- msg
+		streamConf := &nats.StreamConfig{
+			Name:     "STREAM_NAME_ANOTHER",
+			Subjects: []string{"STREAM_EVENT_ANOTHER.*"},
+			MaxAge:   1 * time.Hour,
+			Storage:  nats.FileStorage,
+		}
+
+		_, err = n.AddStream(streamConf)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		countMsg := 10
+		subject := "STREAM_EVENT_ANOTHER.TEST"
+		queue := "test_queue_group"
+
+		msgBytes, err := NewNatsEventMessage().WithEvent(&NatsEvent{
+			ID:     int64(1232),
+			UserID: int64(21),
+		}).Build()
+
+		assert.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			_, err = n.Publish(subject, msgBytes)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		receiverCh := make(chan *nats.Msg)
+		sub, err := n.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < countMsg; i++ {
+			b := <-receiverCh
+
+			assert.Equal(t, msgBytes, b.Data)
+			assert.Equal(t, subject, b.Subject, "test subject")
+		}
+
+		_ = sub.Unsubscribe()
 	})
-	if err != nil {
-		t.Fatal(err)
-	}
 
-	for i := 0; i < countMsg; i++ {
-		b := <-receiverCh
+	t.Run("queue subscribe NatsEventAuditLogMessage", func(t *testing.T) {
+		n, err := NewNATSConnection(defaultURL)
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer func() {
+			n.Close()
+		}()
 
-		assert.Equal(t, msgBytes, b.Data)
-		assert.Equal(t, subject, b.Subject, "test subject")
-	}
+		streamConf := &nats.StreamConfig{
+			Name:     "STREAM_NAME_ANOTHER",
+			Subjects: []string{"STREAM_EVENT_ANOTHER.*"},
+			MaxAge:   1 * time.Hour,
+			Storage:  nats.FileStorage,
+		}
 
-	_ = sub.Unsubscribe()
+		_, err = n.AddStream(streamConf)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		countMsg := 10
+		subject := "STREAM_EVENT_ANOTHER.TEST_NATS_EVENT_AUDIT_LOG_MESSAGE"
+		queue := "test_queue_group"
+
+		type User struct {
+			ID   int64  `json:"id"`
+			Name string `json:"name"`
+		}
+
+		oldData := User{
+			ID:   int64(123),
+			Name: "test name",
+		}
+
+		newData := User{
+			ID:   int64(123),
+			Name: "new test name",
+		}
+
+		byteOldData, err := json.Marshal(oldData)
+		require.NoError(t, err)
+		byteNewData, err := json.Marshal(newData)
+		require.NoError(t, err)
+
+		createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+		require.NoError(t, err)
+
+		msg := &NatsEventAuditLogMessage{
+			ServiceName:    "test-audit",
+			UserID:         123,
+			AuditableType:  "user",
+			AuditableID:    "123",
+			Action:         "update",
+			AuditedChanges: string(byteNewData),
+			OldData:        string(byteOldData),
+			NewData:        string(byteNewData),
+			CreatedAt:      createdAt,
+			Error:          nil,
+		}
+		msgBytes, err := msg.Build()
+		assert.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			_, err = n.Publish(subject, msgBytes)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		receiverCh := make(chan *nats.Msg)
+		sub, err := n.QueueSubscribe(subject, queue, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < countMsg; i++ {
+			b := <-receiverCh
+
+			assert.Equal(t, msgBytes, b.Data)
+			assert.Equal(t, subject, b.Subject, "test subject")
+		}
+
+		_ = sub.Unsubscribe()
+	})
 }
 
 func TestAddStream(t *testing.T) {
