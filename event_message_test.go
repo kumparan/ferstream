@@ -2,6 +2,7 @@ package ferstream
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -36,6 +37,15 @@ func TestNatsEventMessage_WithEvent(t *testing.T) {
 			ExpectedError: false,
 		},
 		{
+			Name: "success with time",
+			Given: &NatsEvent{
+				ID:     111,
+				UserID: 432,
+				Time:   time.Now().Format(NatsEventTimeFormat),
+			},
+			ExpectedError: false,
+		},
+		{
 			Name: "empty id",
 			Given: &NatsEvent{
 				UserID: 432,
@@ -46,6 +56,15 @@ func TestNatsEventMessage_WithEvent(t *testing.T) {
 			Name: "empty user",
 			Given: &NatsEvent{
 				ID: 111,
+			},
+			ExpectedError: true,
+		},
+		{
+			Name: "invalid time format",
+			Given: &NatsEvent{
+				ID:     111,
+				UserID: 432,
+				Time:   time.Now().Format(time.RFC822),
 			},
 			ExpectedError: true,
 		},
@@ -180,10 +199,12 @@ func TestNatsEventMessage_Build(t *testing.T) {
 }
 
 func TestNatsEventMessage_ToJSONString(t *testing.T) {
+	now := time.Now().Format(NatsEventTimeFormat)
 	t.Run("success", func(t *testing.T) {
 		natsEvent := &NatsEvent{
 			ID:     123,
 			UserID: 333,
+			Time:   now,
 		}
 		body := []string{"test"}
 
@@ -193,7 +214,7 @@ func TestNatsEventMessage_ToJSONString(t *testing.T) {
 
 		parsed, err := msg.ToJSONString()
 		require.NoError(t, err)
-		expectedRes := "{\"NatsEvent\":{\"id\":123,\"id_string\":\"\",\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+		expectedRes := fmt.Sprintf("{\"NatsEvent\":{\"id\":123,\"id_string\":\"\",\"user_id\":333,\"tenant_id\":0,\"time\":\"%s\",\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}", now)
 		assert.Equal(t, expectedRes, parsed)
 	})
 
@@ -201,6 +222,7 @@ func TestNatsEventMessage_ToJSONString(t *testing.T) {
 		natsEvent := &NatsEvent{
 			UserID:   333,
 			IDString: "630484ae00f0d71df588a0ab",
+			Time:     now,
 		}
 		body := []string{"test"}
 
@@ -210,7 +232,7 @@ func TestNatsEventMessage_ToJSONString(t *testing.T) {
 
 		parsed, err := msg.ToJSONString()
 		require.NoError(t, err)
-		expectedRes := "{\"NatsEvent\":{\"id\":0,\"id_string\":\"630484ae00f0d71df588a0ab\",\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
+		expectedRes := fmt.Sprintf("{\"NatsEvent\":{\"id\":0,\"id_string\":\"630484ae00f0d71df588a0ab\",\"user_id\":333,\"tenant_id\":0,\"time\":\"%s\",\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}", now)
 		assert.Equal(t, expectedRes, parsed)
 	})
 }
@@ -236,11 +258,12 @@ func TestNatsEventMessage_ToJSONByte(t *testing.T) {
 }
 
 func TestNatsEventMessage_ParseJSON(t *testing.T) {
-	json := "{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}"
-
+	now := time.Now().Format(NatsEventTimeFormat)
+	json := fmt.Sprintf("{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"time\":\"%s\",\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}", now)
 	natsEvent := &NatsEvent{
 		ID:     123,
 		UserID: 333,
+		Time:   now,
 	}
 	body := []string{"test"}
 	msg := NewNatsEventMessage().WithEvent(natsEvent).WithBody(body)

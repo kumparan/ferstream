@@ -4,11 +4,13 @@ import (
 	"time"
 
 	"github.com/kumparan/go-utils"
-	"google.golang.org/protobuf/proto"
-
 	"github.com/kumparan/tapao"
 	"github.com/pkg/errors"
+	"google.golang.org/protobuf/proto"
 )
+
+// NatsEventTimeFormat time format for NatsEvent 'time' field
+const NatsEventTimeFormat = time.RFC3339Nano
 
 type (
 	// NatsEvent :nodoc:
@@ -17,6 +19,7 @@ type (
 		IDString string `json:"id_string"`
 		UserID   int64  `json:"user_id"`
 		TenantID int64  `json:"tenant_id"`
+		Time     string `json:"time"`
 		Subject  string `json:"subject"` // empty on publish
 	}
 
@@ -93,6 +96,20 @@ func (n *NatsEvent) GetIDString() string {
 	return n.IDString
 }
 
+// GetTime :nodoc:
+func (n *NatsEvent) GetTime() string {
+	if n == nil {
+		return ""
+	}
+	return n.Time
+}
+
+// IsTimeValid :nodoc:
+func (n *NatsEvent) IsTimeValid() bool {
+	_, err := time.Parse(NatsEventTimeFormat, n.GetTime())
+	return err == nil
+}
+
 // NewNatsEventMessage :nodoc:
 func NewNatsEventMessage() *NatsEventMessage {
 	return &NatsEventMessage{}
@@ -128,6 +145,16 @@ func (n *NatsEventMessage) WithEvent(e *NatsEvent) *NatsEventMessage {
 	if e.GetUserID() == 0 {
 		n.wrapError(errors.New("empty user id"))
 		return n
+	}
+
+	switch e.GetTime() {
+	case "":
+		e.Time = time.Now().Format(NatsEventTimeFormat)
+	default:
+		if !e.IsTimeValid() {
+			n.wrapError(errors.New("invalid time format"))
+			return n
+		}
 	}
 
 	n.NatsEvent = e

@@ -2,7 +2,6 @@ package ferstream
 
 import (
 	"encoding/json"
-	"log"
 	"os"
 	"testing"
 	"time"
@@ -45,8 +44,8 @@ func TestPublish(t *testing.T) {
 	}()
 
 	streamConf := &nats.StreamConfig{
-		Name:     "STREAM_NAME",
-		Subjects: []string{"STREAM_EVENT.*"},
+		Name:     "STREAM_NAME_PUBLISH_2",
+		Subjects: []string{"STREAM_NAME_PUBLISH_2.*"},
 		MaxAge:   1 * time.Hour,
 		Storage:  nats.FileStorage,
 	}
@@ -56,7 +55,7 @@ func TestPublish(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, err = n.Publish("STREAM_EVENT.TEST", []byte("test"))
+	_, err = n.Publish("STREAM_NAME_PUBLISH_2.TEST", []byte("test"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -73,8 +72,8 @@ func TestQueueSubscribe(t *testing.T) {
 		}()
 
 		streamConf := &nats.StreamConfig{
-			Name:     "STREAM_NAME_ANOTHER",
-			Subjects: []string{"STREAM_EVENT_ANOTHER.*"},
+			Name:     "STREAM_NAME_QUEUE_SUBSCRIBE_2",
+			Subjects: []string{"STREAM_NAME_QUEUE_SUBSCRIBE_2.*"},
 			MaxAge:   1 * time.Hour,
 			Storage:  nats.FileStorage,
 		}
@@ -85,7 +84,7 @@ func TestQueueSubscribe(t *testing.T) {
 		}
 
 		countMsg := 10
-		subject := "STREAM_EVENT_ANOTHER.TEST"
+		subject := "STREAM_NAME_QUEUE_SUBSCRIBE_2.TEST"
 		queue := "test_queue_group"
 
 		msgBytes, err := NewNatsEventMessage().WithEvent(&NatsEvent{
@@ -130,8 +129,8 @@ func TestQueueSubscribe(t *testing.T) {
 		}()
 
 		streamConf := &nats.StreamConfig{
-			Name:     "STREAM_NAME_ANOTHER",
-			Subjects: []string{"STREAM_EVENT_ANOTHER.*"},
+			Name:     "STREAM_NAME_AUDIT_2",
+			Subjects: []string{"STREAM_NAME_AUDIT_2.*"},
 			MaxAge:   1 * time.Hour,
 			Storage:  nats.FileStorage,
 		}
@@ -142,7 +141,7 @@ func TestQueueSubscribe(t *testing.T) {
 		}
 
 		countMsg := 10
-		subject := "STREAM_EVENT_ANOTHER.TEST_NATS_EVENT_AUDIT_LOG_MESSAGE"
+		subject := "STREAM_NAME_AUDIT_2.TEST_NATS_EVENT_AUDIT_LOG_MESSAGE"
 		queue := "test_queue_group"
 
 		type User struct {
@@ -228,7 +227,7 @@ func TestAddStream(t *testing.T) {
 	_, err = n.AddStream(streamConf)
 
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
 
 	// test update config
@@ -274,5 +273,4 @@ func TestConsumerInfo(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, consumerInfo2)
 	assert.Equal(t, nats.ErrConsumerNotFound, err)
-
 }
