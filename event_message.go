@@ -10,7 +10,7 @@ import (
 )
 
 // NatsEventTimeFormat time format for NatsEvent 'time' field
-const NatsEventTimeFormat = time.RFC3339
+const NatsEventTimeFormat = time.RFC3339Nano
 
 type (
 	// NatsEvent :nodoc:
