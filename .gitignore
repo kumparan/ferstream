@@ -15,4 +15,5 @@
 vendor/
 /config.yml
 .vscode
-.idea/
+.idea
+.jetstream_log

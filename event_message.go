@@ -105,7 +105,7 @@ func (n *NatsEvent) GetTime() string {
 }
 
 // IsTimeValid :nodoc:
-func (n *NatsEvent) IsTimeValid() bool {
+func (n *NatsEvent) isTimeValid() bool {
 	_, err := time.Parse(NatsEventTimeFormat, n.GetTime())
 	return err == nil
 }
@@ -151,7 +151,7 @@ func (n *NatsEventMessage) WithEvent(e *NatsEvent) *NatsEventMessage {
 	case "":
 		e.Time = time.Now().Format(NatsEventTimeFormat)
 	default:
-		if !e.IsTimeValid() {
+		if !e.isTimeValid() {
 			n.wrapError(errors.New("invalid time format"))
 			return n
 		}
@@ -195,7 +195,7 @@ func (n *NatsEventMessage) wrapError(err error) {
 
 // ParseFromBytes :nodoc:
 func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
-	err = tapao.Unmarshal(data, &n, tapao.With(tapao.JSON))
+	err = tapao.Unmarshal(data, &n, tapao.FallbackWith(tapao.JSON))
 	if err != nil {
 		n.Error = errors.Wrap(n.Error, err.Error())
 		return err
