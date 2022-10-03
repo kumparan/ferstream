@@ -195,7 +195,7 @@ func (n *NatsEventMessage) wrapError(err error) {
 
 // ParseFromBytes :nodoc:
 func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
-	err = tapao.Unmarshal(data, &n, tapao.FallbackWith(tapao.JSON))
+	err = tapao.Unmarshal(data, &n, tapao.With(tapao.JSON), tapao.FallbackWith(tapao.MessagePack))
 	if err != nil {
 		n.Error = errors.Wrap(n.Error, err.Error())
 		return err
