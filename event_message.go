@@ -275,6 +275,13 @@ func ParseJSON(in string) (*NatsEventMessage, error) {
 	return msg, err
 }
 
+// ParseNatsEventMessageFromBytes :nodoc:
+func ParseNatsEventMessageFromBytes(in []byte) (*NatsEventMessage, error) {
+	msg := &NatsEventMessage{}
+	err := tapao.Unmarshal(in, msg, tapao.With(tapao.JSON))
+	return msg, err
+}
+
 // ParseNatsEventAuditLogMessageFromBytes :nodoc:
 func ParseNatsEventAuditLogMessageFromBytes(in []byte) (*NatsEventAuditLogMessage, error) {
 	msg := &NatsEventAuditLogMessage{}

@@ -274,6 +274,23 @@ func TestNatsEventMessage_ParseJSON(t *testing.T) {
 	assert.Equal(t, msg, parsed)
 }
 
+func TestNatsEventMessage_ParseNatsEventMessageFromBytes(t *testing.T) {
+	now := time.Now().Format(NatsEventTimeFormat)
+	json := fmt.Sprintf("{\"NatsEvent\":{\"id\":123,\"user_id\":333,\"tenant_id\":0,\"time\":\"%s\",\"subject\":\"\"},\"body\":\"[\\\"test\\\"]\",\"old_body\":\"\",\"request\":null,\"error\":null}", now)
+	natsEvent := &NatsEvent{
+		ID:     123,
+		UserID: 333,
+		Time:   now,
+	}
+	body := []string{"test"}
+	msg := NewNatsEventMessage().WithEvent(natsEvent).WithBody(body)
+
+	parsed, err := ParseNatsEventMessageFromBytes([]byte(json))
+	require.NoError(t, err)
+
+	assert.Equal(t, msg, parsed)
+}
+
 func TestNatsEventAuditLogMessage_Build(t *testing.T) {
 	type User struct {
 		ID   int64  `json:"id"`
