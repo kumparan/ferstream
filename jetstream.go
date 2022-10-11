@@ -111,6 +111,7 @@ func NewNATSMessageHandler(payload MessageParser, retryAttempts int, retryInterv
 		}
 
 		payload.AddSubject(msg.Subject)
+		defer logger.WithField("payload", utils.Dump(payload)).Warn("message payload")
 
 		retryErr := utils.Retry(retryAttempts, retryInterval, func() error {
 			return msgHandler(payload)
