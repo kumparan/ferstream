@@ -39,7 +39,7 @@ func TestPublish(t *testing.T) {
 	n, err := NewNATSConnection(defaultURL, natsOpts...)
 	require.NoError(t, err)
 	defer func() {
-		n.Close()
+		SafeClose(n)
 	}()
 
 	streamConf := &nats.StreamConfig{
@@ -62,7 +62,7 @@ func TestQueueSubscribe(t *testing.T) {
 		require.NoError(t, err)
 
 		defer func() {
-			n.Close()
+			SafeClose(n)
 		}()
 
 		streamConf := &nats.StreamConfig{
@@ -112,7 +112,7 @@ func TestQueueSubscribe(t *testing.T) {
 		require.NoError(t, err)
 
 		defer func() {
-			n.Close()
+			SafeClose(n)
 		}()
 
 		streamConf := &nats.StreamConfig{
@@ -196,7 +196,7 @@ func TestSubscribe(t *testing.T) {
 		require.NoError(t, err)
 
 		defer func() {
-			n.Close()
+			SafeClose(n)
 		}()
 
 		streamConf := &nats.StreamConfig{
@@ -244,8 +244,12 @@ func TestSubscribe(t *testing.T) {
 		n, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
 
+		n2, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+
 		defer func() {
-			n.Close()
+			SafeClose(n)
+			SafeClose(n2)
 		}()
 
 		streamConf := &nats.StreamConfig{
@@ -311,7 +315,12 @@ func TestSubscribe(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		sub2, err := n2.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg*2; i++ {
 			b := <-receiverCh
 
 			assert.Equal(t, msgBytes, b.Data)
@@ -319,6 +328,7 @@ func TestSubscribe(t *testing.T) {
 		}
 
 		_ = sub.Unsubscribe()
+		_ = sub2.Unsubscribe()
 	})
 }
 
@@ -327,7 +337,7 @@ func TestAddStream(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
-		n.Close()
+		SafeClose(n)
 	}()
 
 	streamConf := &nats.StreamConfig{
@@ -355,7 +365,7 @@ func TestAddStream(t *testing.T) {
 func TestConsumerInfo(t *testing.T) {
 	n, err := NewNATSConnection(defaultURL)
 	require.NoError(t, err)
-	defer n.Close()
+	defer SafeClose(n)
 
 	updateConf := &nats.StreamConfig{
 		Name:     "STREAM_NAME",
@@ -378,4 +388,10 @@ func TestConsumerInfo(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, consumerInfo2)
 	assert.Equal(t, nats.ErrConsumerNotFound, err)
+}
+
+func TestClose(t *testing.T) {
+	js, err := NewNATSConnection(defaultURL)
+	require.Error(t, err)
+	SafeClose(js)
 }
