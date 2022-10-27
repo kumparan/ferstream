@@ -125,3 +125,23 @@ func (mr *MockJetStreamMockRecorder) QueueSubscribe(arg0, arg1, arg2 interface{}
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueueSubscribe", reflect.TypeOf((*MockJetStream)(nil).QueueSubscribe), varargs...)
 }
+
+// Subscribe mocks base method.
+func (m *MockJetStream) Subscribe(arg0 string, arg1 nats.MsgHandler, arg2 ...nats.SubOpt) (*nats.Subscription, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Subscribe", varargs...)
+	ret0, _ := ret[0].(*nats.Subscription)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Subscribe indicates an expected call of Subscribe.
+func (mr *MockJetStreamMockRecorder) Subscribe(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockJetStream)(nil).Subscribe), varargs...)
+}

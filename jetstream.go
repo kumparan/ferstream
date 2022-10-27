@@ -13,6 +13,7 @@ type (
 	JetStream interface {
 		Publish(subject string, value []byte, opts ...nats.PubOpt) (*nats.PubAck, error)
 		QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
+		Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
 		Close()
 		AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error)
 		ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error)
@@ -168,6 +169,14 @@ func (j *jsImpl) QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...
 		return nil, ErrConnectionLost
 	}
 	return j.jsCtx.QueueSubscribe(subj, queue, cb, opts...)
+}
+
+// Subscribe :nodoc:
+func (j *jsImpl) Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
+	if !j.checkConnIsValid() {
+		return nil, ErrConnectionLost
+	}
+	return j.jsCtx.Subscribe(subj, cb, opts...)
 }
 
 // Close close NATS connection

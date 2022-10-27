@@ -190,6 +190,138 @@ func TestQueueSubscribe(t *testing.T) {
 	})
 }
 
+func TestSubscribe(t *testing.T) {
+	t.Run("subscribe NatsEventMessage", func(t *testing.T) {
+		n, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+
+		defer func() {
+			n.Close()
+		}()
+
+		streamConf := &nats.StreamConfig{
+			Name:      "STREAM_NAME_SUBSCRIBE",
+			Subjects:  []string{"STREAM_NAME_SUBSCRIBE.*"},
+			Storage:   nats.FileStorage,
+			Retention: nats.WorkQueuePolicy,
+		}
+
+		_, err = n.AddStream(streamConf)
+		require.NoError(t, err)
+
+		countMsg := 10
+		subject := "STREAM_NAME_SUBSCRIBE.TEST"
+
+		msgBytes, err := NewNatsEventMessage().WithEvent(&NatsEvent{
+			ID:     int64(1232),
+			UserID: int64(21),
+		}).Build()
+
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			_, err = n.Publish(subject, msgBytes)
+			require.NoError(t, err)
+		}
+
+		receiverCh := make(chan *nats.Msg)
+		sub, err := n.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			b := <-receiverCh
+
+			assert.Equal(t, msgBytes, b.Data)
+			assert.Equal(t, subject, b.Subject, "test subject")
+		}
+
+		_ = sub.Unsubscribe()
+	})
+
+	t.Run("subscribe NatsEventAuditLogMessage", func(t *testing.T) {
+		n, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+
+		defer func() {
+			n.Close()
+		}()
+
+		streamConf := &nats.StreamConfig{
+			Name:      "STREAM_NAME_AUDIT",
+			Subjects:  []string{"STREAM_NAME_AUDIT.*"},
+			Storage:   nats.FileStorage,
+			Retention: nats.WorkQueuePolicy,
+		}
+
+		_, err = n.AddStream(streamConf)
+		require.NoError(t, err)
+
+		countMsg := 10
+		subject := "STREAM_NAME_AUDIT.TEST_NATS_EVENT_AUDIT_LOG_MESSAGE"
+
+		type User struct {
+			ID   int64  `json:"id"`
+			Name string `json:"name"`
+		}
+
+		oldData := User{
+			ID:   int64(123),
+			Name: "test name",
+		}
+
+		newData := User{
+			ID:   int64(123),
+			Name: "new test name",
+		}
+
+		byteOldData, err := json.Marshal(oldData)
+		require.NoError(t, err)
+		byteNewData, err := json.Marshal(newData)
+		require.NoError(t, err)
+
+		createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+		require.NoError(t, err)
+
+		msg := &NatsEventAuditLogMessage{
+			ServiceName:    "test-audit",
+			UserID:         123,
+			AuditableType:  "user",
+			AuditableID:    "123",
+			Action:         "update",
+			AuditedChanges: string(byteNewData),
+			OldData:        string(byteOldData),
+			NewData:        string(byteNewData),
+			CreatedAt:      createdAt,
+			Error:          nil,
+		}
+		msgBytes, err := msg.Build()
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			_, err = n.Publish(subject, msgBytes)
+			require.NoError(t, err)
+
+		}
+
+		receiverCh := make(chan *nats.Msg)
+		sub, err := n.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			b := <-receiverCh
+
+			assert.Equal(t, msgBytes, b.Data)
+			assert.Equal(t, subject, b.Subject, "test subject")
+		}
+
+		_ = sub.Unsubscribe()
+	})
+}
+
 func TestAddStream(t *testing.T) {
 	n, err := NewNATSConnection(defaultURL)
 	require.NoError(t, err)
