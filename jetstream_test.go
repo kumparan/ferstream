@@ -38,7 +38,7 @@ func TestPublish(t *testing.T) {
 
 	n, err := NewNATSConnection(defaultURL, natsOpts...)
 	require.NoError(t, err)
-	SafeClose(n)
+	defer SafeClose(n)
 
 	streamConf := &nats.StreamConfig{
 		Name:      "STREAM_NAME_PUBLISH",
@@ -59,9 +59,7 @@ func TestQueueSubscribe(t *testing.T) {
 		n, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
 
-		defer func() {
-			SafeClose(n)
-		}()
+		defer SafeClose(n)
 
 		streamConf := &nats.StreamConfig{
 			Name:      "STREAM_NAME_QUEUE_SUBSCRIBE",
@@ -108,10 +106,7 @@ func TestQueueSubscribe(t *testing.T) {
 	t.Run("queue subscribe NatsEventAuditLogMessage", func(t *testing.T) {
 		n, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
-
-		defer func() {
-			SafeClose(n)
-		}()
+		defer SafeClose(n)
 
 		streamConf := &nats.StreamConfig{
 			Name:      "STREAM_NAME_AUDIT",
@@ -195,8 +190,8 @@ func TestSubscribe(t *testing.T) {
 
 		n2, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
-		SafeClose(n)
-		SafeClose(n2)
+		defer SafeClose(n)
+		defer SafeClose(n2)
 
 		streamConf := &nats.StreamConfig{
 			Name:     "STREAM_NAME_SUBSCRIBE",
@@ -252,8 +247,8 @@ func TestSubscribe(t *testing.T) {
 		n2, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
 
-		SafeClose(n)
-		SafeClose(n2)
+		defer SafeClose(n)
+		defer SafeClose(n2)
 
 		streamConf := &nats.StreamConfig{
 			Name:     "STREAM_NAME_AUDIT",
@@ -338,7 +333,7 @@ func TestAddStream(t *testing.T) {
 	n, err := NewNATSConnection(defaultURL)
 	require.NoError(t, err)
 
-	SafeClose(n)
+	defer SafeClose(n)
 
 	streamConf := &nats.StreamConfig{
 		Name:     "STREAM_NAMEXX",
