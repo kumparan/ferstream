@@ -195,15 +195,17 @@ func TestSubscribe(t *testing.T) {
 		n, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
 
+		n2, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
 		defer func() {
 			SafeClose(n)
+			SafeClose(n2)
 		}()
 
 		streamConf := &nats.StreamConfig{
-			Name:      "STREAM_NAME_SUBSCRIBE",
-			Subjects:  []string{"STREAM_NAME_SUBSCRIBE.*"},
-			Storage:   nats.FileStorage,
-			Retention: nats.WorkQueuePolicy,
+			Name:     "STREAM_NAME_SUBSCRIBE",
+			Subjects: []string{"STREAM_NAME_SUBSCRIBE.*"},
+			Storage:  nats.FileStorage,
 		}
 
 		_, err = n.AddStream(streamConf)
@@ -230,7 +232,13 @@ func TestSubscribe(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		sub2, err := n2.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		// receive double of the message count beacuse of 2 subscriber
+		for i := 0; i < countMsg*2; i++ {
 			b := <-receiverCh
 
 			assert.Equal(t, msgBytes, b.Data)
@@ -238,6 +246,7 @@ func TestSubscribe(t *testing.T) {
 		}
 
 		_ = sub.Unsubscribe()
+		_ = sub2.Unsubscribe()
 	})
 
 	t.Run("subscribe NatsEventAuditLogMessage", func(t *testing.T) {
@@ -253,10 +262,9 @@ func TestSubscribe(t *testing.T) {
 		}()
 
 		streamConf := &nats.StreamConfig{
-			Name:      "STREAM_NAME_AUDIT",
-			Subjects:  []string{"STREAM_NAME_AUDIT.*"},
-			Storage:   nats.FileStorage,
-			Retention: nats.WorkQueuePolicy,
+			Name:     "STREAM_NAME_AUDIT",
+			Subjects: []string{"STREAM_NAME_AUDIT.*"},
+			Storage:  nats.FileStorage,
 		}
 
 		_, err = n.AddStream(streamConf)
@@ -388,10 +396,4 @@ func TestConsumerInfo(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, consumerInfo2)
 	assert.Equal(t, nats.ErrConsumerNotFound, err)
-}
-
-func TestClose(t *testing.T) {
-	js, err := NewNATSConnection(defaultURL)
-	require.Error(t, err)
-	SafeClose(js)
 }

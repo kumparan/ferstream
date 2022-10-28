@@ -151,12 +151,14 @@ func connect(url string, options ...nats.Option) (*nats.Conn, error) {
 	return nc, nil
 }
 
+// GetNatsConnection :nodoc:
 func (j *jsImpl) GetNatsConnection() *nats.Conn {
 	if j == nil {
 		return nil
 	}
 	return j.natsConn
 }
+
 func (j *jsImpl) checkConnIsValid() (b bool) {
 	return j.natsConn != nil && j.natsConn.IsConnected()
 }
