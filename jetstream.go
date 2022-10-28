@@ -217,7 +217,7 @@ func SafeClose(js JetStream) {
 	if js == nil {
 		return
 	}
-	natsConn := js.GetNatsConnection()
+	natsConn := js.GetNATSConnection()
 	if natsConn == nil {
 		return
 	}
