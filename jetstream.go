@@ -152,7 +152,7 @@ func connect(url string, options ...nats.Option) (*nats.Conn, error) {
 }
 
 // GetNatsConnection :nodoc:
-func (j *jsImpl) GetNatsConnection() *nats.Conn {
+func (j *jsImpl) GetNATSConnection() *nats.Conn {
 	if j == nil {
 		return nil
 	}
