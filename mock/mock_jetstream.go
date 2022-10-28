@@ -54,18 +54,6 @@ func (mr *MockJetStreamMockRecorder) AddStream(arg0 interface{}, arg1 ...interfa
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddStream", reflect.TypeOf((*MockJetStream)(nil).AddStream), varargs...)
 }
 
-// Close mocks base method.
-func (m *MockJetStream) Close() {
-	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Close")
-}
-
-// Close indicates an expected call of Close.
-func (mr *MockJetStreamMockRecorder) Close() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockJetStream)(nil).Close))
-}
-
 // ConsumerInfo mocks base method.
 func (m *MockJetStream) ConsumerInfo(arg0, arg1 string, arg2 ...nats.JSOpt) (*nats.ConsumerInfo, error) {
 	m.ctrl.T.Helper()
@@ -84,6 +72,20 @@ func (mr *MockJetStreamMockRecorder) ConsumerInfo(arg0, arg1 interface{}, arg2 .
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1}, arg2...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ConsumerInfo", reflect.TypeOf((*MockJetStream)(nil).ConsumerInfo), varargs...)
+}
+
+// GetNATSConnection mocks base method.
+func (m *MockJetStream) GetNATSConnection() *nats.Conn {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetNATSConnection")
+	ret0, _ := ret[0].(*nats.Conn)
+	return ret0
+}
+
+// GetNATSConnection indicates an expected call of GetNATSConnection.
+func (mr *MockJetStreamMockRecorder) GetNATSConnection() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNATSConnection", reflect.TypeOf((*MockJetStream)(nil).GetNATSConnection))
 }
 
 // Publish mocks base method.
@@ -124,4 +126,24 @@ func (mr *MockJetStreamMockRecorder) QueueSubscribe(arg0, arg1, arg2 interface{}
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{arg0, arg1, arg2}, arg3...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "QueueSubscribe", reflect.TypeOf((*MockJetStream)(nil).QueueSubscribe), varargs...)
+}
+
+// Subscribe mocks base method.
+func (m *MockJetStream) Subscribe(arg0 string, arg1 nats.MsgHandler, arg2 ...nats.SubOpt) (*nats.Subscription, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{arg0, arg1}
+	for _, a := range arg2 {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Subscribe", varargs...)
+	ret0, _ := ret[0].(*nats.Subscription)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Subscribe indicates an expected call of Subscribe.
+func (mr *MockJetStreamMockRecorder) Subscribe(arg0, arg1 interface{}, arg2 ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{arg0, arg1}, arg2...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Subscribe", reflect.TypeOf((*MockJetStream)(nil).Subscribe), varargs...)
 }

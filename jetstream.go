@@ -13,9 +13,10 @@ type (
 	JetStream interface {
 		Publish(subject string, value []byte, opts ...nats.PubOpt) (*nats.PubAck, error)
 		QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
-		Close()
+		Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
 		AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error)
 		ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error)
+		GetNATSConnection() *nats.Conn
 	}
 
 	// jsImpl JetStream implementation
@@ -150,6 +151,14 @@ func connect(url string, options ...nats.Option) (*nats.Conn, error) {
 	return nc, nil
 }
 
+// GetNATSConnection :nodoc:
+func (j *jsImpl) GetNATSConnection() *nats.Conn {
+	if j == nil {
+		return nil
+	}
+	return j.natsConn
+}
+
 func (j *jsImpl) checkConnIsValid() (b bool) {
 	return j.natsConn != nil && j.natsConn.IsConnected()
 }
@@ -170,11 +179,12 @@ func (j *jsImpl) QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...
 	return j.jsCtx.QueueSubscribe(subj, queue, cb, opts...)
 }
 
-// Close close NATS connection
-func (j *jsImpl) Close() {
-	if j.checkConnIsValid() {
-		j.natsConn.Close()
+// Subscribe :nodoc:
+func (j *jsImpl) Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
+	if !j.checkConnIsValid() {
+		return nil, ErrConnectionLost
 	}
+	return j.jsCtx.Subscribe(subj, cb, opts...)
 }
 
 // AddStream add stream
@@ -193,11 +203,26 @@ func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.St
 
 }
 
-// ConsumerInfo
+// ConsumerInfo :nodoc:
 func (j *jsImpl) ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
 	if !j.checkConnIsValid() {
 		return nil, ErrConnectionLost
 	}
 
 	return j.jsCtx.ConsumerInfo(streamName, consumerName, opts...)
+}
+
+// SafeClose :nodoc:
+func SafeClose(js JetStream) {
+	if js == nil {
+		return
+	}
+	natsConn := js.GetNATSConnection()
+	if natsConn == nil {
+		return
+	}
+	if !natsConn.IsConnected() {
+		return
+	}
+	natsConn.Close()
 }

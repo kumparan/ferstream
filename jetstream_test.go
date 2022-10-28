@@ -38,9 +38,7 @@ func TestPublish(t *testing.T) {
 
 	n, err := NewNATSConnection(defaultURL, natsOpts...)
 	require.NoError(t, err)
-	defer func() {
-		n.Close()
-	}()
+	defer SafeClose(n)
 
 	streamConf := &nats.StreamConfig{
 		Name:      "STREAM_NAME_PUBLISH",
@@ -61,9 +59,7 @@ func TestQueueSubscribe(t *testing.T) {
 		n, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
 
-		defer func() {
-			n.Close()
-		}()
+		defer SafeClose(n)
 
 		streamConf := &nats.StreamConfig{
 			Name:      "STREAM_NAME_QUEUE_SUBSCRIBE",
@@ -110,10 +106,7 @@ func TestQueueSubscribe(t *testing.T) {
 	t.Run("queue subscribe NatsEventAuditLogMessage", func(t *testing.T) {
 		n, err := NewNATSConnection(defaultURL)
 		require.NoError(t, err)
-
-		defer func() {
-			n.Close()
-		}()
+		defer SafeClose(n)
 
 		streamConf := &nats.StreamConfig{
 			Name:      "STREAM_NAME_AUDIT",
@@ -190,13 +183,157 @@ func TestQueueSubscribe(t *testing.T) {
 	})
 }
 
+func TestSubscribe(t *testing.T) {
+	t.Run("subscribe NatsEventMessage", func(t *testing.T) {
+		n, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+
+		n2, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+		defer SafeClose(n)
+		defer SafeClose(n2)
+
+		streamConf := &nats.StreamConfig{
+			Name:     "STREAM_NAME_SUBSCRIBE",
+			Subjects: []string{"STREAM_NAME_SUBSCRIBE.*"},
+			Storage:  nats.FileStorage,
+		}
+
+		_, err = n.AddStream(streamConf)
+		require.NoError(t, err)
+
+		countMsg := 10
+		subject := "STREAM_NAME_SUBSCRIBE.TEST"
+
+		msgBytes, err := NewNatsEventMessage().WithEvent(&NatsEvent{
+			ID:     int64(1232),
+			UserID: int64(21),
+		}).Build()
+
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			_, err = n.Publish(subject, msgBytes)
+			require.NoError(t, err)
+		}
+
+		receiverCh := make(chan *nats.Msg)
+		sub, err := n.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		sub2, err := n2.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		// receive double of the message count beacuse of 2 subscriber
+		for i := 0; i < countMsg*2; i++ {
+			b := <-receiverCh
+
+			assert.Equal(t, msgBytes, b.Data)
+			assert.Equal(t, subject, b.Subject, "test subject")
+		}
+
+		_ = sub.Unsubscribe()
+		_ = sub2.Unsubscribe()
+	})
+
+	t.Run("subscribe NatsEventAuditLogMessage", func(t *testing.T) {
+		n, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+
+		n2, err := NewNATSConnection(defaultURL)
+		require.NoError(t, err)
+
+		defer SafeClose(n)
+		defer SafeClose(n2)
+
+		streamConf := &nats.StreamConfig{
+			Name:     "STREAM_NAME_AUDIT",
+			Subjects: []string{"STREAM_NAME_AUDIT.*"},
+			Storage:  nats.FileStorage,
+		}
+
+		_, err = n.AddStream(streamConf)
+		require.NoError(t, err)
+
+		countMsg := 10
+		subject := "STREAM_NAME_AUDIT.TEST_NATS_EVENT_AUDIT_LOG_MESSAGE"
+
+		type User struct {
+			ID   int64  `json:"id"`
+			Name string `json:"name"`
+		}
+
+		oldData := User{
+			ID:   int64(123),
+			Name: "test name",
+		}
+
+		newData := User{
+			ID:   int64(123),
+			Name: "new test name",
+		}
+
+		byteOldData, err := json.Marshal(oldData)
+		require.NoError(t, err)
+		byteNewData, err := json.Marshal(newData)
+		require.NoError(t, err)
+
+		createdAt, err := time.Parse("2006-01-02", "2020-01-29")
+		require.NoError(t, err)
+
+		msg := &NatsEventAuditLogMessage{
+			ServiceName:    "test-audit",
+			UserID:         123,
+			AuditableType:  "user",
+			AuditableID:    "123",
+			Action:         "update",
+			AuditedChanges: string(byteNewData),
+			OldData:        string(byteOldData),
+			NewData:        string(byteNewData),
+			CreatedAt:      createdAt,
+			Error:          nil,
+		}
+		msgBytes, err := msg.Build()
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg; i++ {
+			_, err = n.Publish(subject, msgBytes)
+			require.NoError(t, err)
+
+		}
+
+		receiverCh := make(chan *nats.Msg)
+		sub, err := n.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		sub2, err := n2.Subscribe(subject, func(msg *nats.Msg) {
+			receiverCh <- msg
+		})
+		require.NoError(t, err)
+
+		for i := 0; i < countMsg*2; i++ {
+			b := <-receiverCh
+
+			assert.Equal(t, msgBytes, b.Data)
+			assert.Equal(t, subject, b.Subject, "test subject")
+		}
+
+		_ = sub.Unsubscribe()
+		_ = sub2.Unsubscribe()
+	})
+}
+
 func TestAddStream(t *testing.T) {
 	n, err := NewNATSConnection(defaultURL)
 	require.NoError(t, err)
 
-	defer func() {
-		n.Close()
-	}()
+	defer SafeClose(n)
 
 	streamConf := &nats.StreamConfig{
 		Name:     "STREAM_NAMEXX",
@@ -223,7 +360,7 @@ func TestAddStream(t *testing.T) {
 func TestConsumerInfo(t *testing.T) {
 	n, err := NewNATSConnection(defaultURL)
 	require.NoError(t, err)
-	defer n.Close()
+	defer SafeClose(n)
 
 	updateConf := &nats.StreamConfig{
 		Name:     "STREAM_NAME",
