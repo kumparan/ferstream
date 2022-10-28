@@ -16,7 +16,7 @@ type (
 		Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error)
 		AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error)
 		ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error)
-		GetNatsConnection() *nats.Conn
+		GetNATSConnection() *nats.Conn
 	}
 
 	// jsImpl JetStream implementation
