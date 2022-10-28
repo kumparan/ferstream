@@ -151,7 +151,7 @@ func connect(url string, options ...nats.Option) (*nats.Conn, error) {
 	return nc, nil
 }
 
-// GetNatsConnection :nodoc:
+// GetNATSConnection :nodoc:
 func (j *jsImpl) GetNATSConnection() *nats.Conn {
 	if j == nil {
 		return nil
