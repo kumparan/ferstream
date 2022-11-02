@@ -52,13 +52,9 @@ func (j *jsImpl) GetNATSConnection() *nats.Conn {
 	return j.natsConn
 }
 
-func (j *jsImpl) checkConnIsValid() (b bool) {
-	return j.natsConn != nil && j.natsConn.IsConnected()
-}
-
 // Publish publish message using JetStream
 func (j *jsImpl) Publish(subject string, value []byte, opts ...nats.PubOpt) (*nats.PubAck, error) {
-	if !j.checkConnIsValid() {
+	if !j.isValidConn() {
 		return nil, ErrConnectionLost
 	}
 	return j.jsCtx.Publish(subject, value, opts...)
@@ -66,7 +62,7 @@ func (j *jsImpl) Publish(subject string, value []byte, opts ...nats.PubOpt) (*na
 
 // QueueSubscribe :nodoc:
 func (j *jsImpl) QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	if !j.checkConnIsValid() {
+	if !j.isValidConn() {
 		return nil, ErrConnectionLost
 	}
 	return j.jsCtx.QueueSubscribe(subj, queue, cb, opts...)
@@ -74,7 +70,7 @@ func (j *jsImpl) QueueSubscribe(subj, queue string, cb nats.MsgHandler, opts ...
 
 // Subscribe :nodoc:
 func (j *jsImpl) Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt) (*nats.Subscription, error) {
-	if !j.checkConnIsValid() {
+	if !j.isValidConn() {
 		return nil, ErrConnectionLost
 	}
 	return j.jsCtx.Subscribe(subj, cb, opts...)
@@ -82,7 +78,7 @@ func (j *jsImpl) Subscribe(subj string, cb nats.MsgHandler, opts ...nats.SubOpt)
 
 // AddStream add stream
 func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.StreamInfo, error) {
-	if !j.checkConnIsValid() {
+	if !j.isValidConn() {
 		return nil, ErrConnectionLost
 	}
 
@@ -98,11 +94,15 @@ func (j *jsImpl) AddStream(cfg *nats.StreamConfig, opts ...nats.JSOpt) (*nats.St
 
 // ConsumerInfo :nodoc:
 func (j *jsImpl) ConsumerInfo(streamName, consumerName string, opts ...nats.JSOpt) (*nats.ConsumerInfo, error) {
-	if !j.checkConnIsValid() {
+	if !j.isValidConn() {
 		return nil, ErrConnectionLost
 	}
 
 	return j.jsCtx.ConsumerInfo(streamName, consumerName, opts...)
+}
+
+func (j *jsImpl) isValidConn() (b bool) {
+	return j.natsConn != nil && j.natsConn.IsConnected()
 }
 
 // NewNATSMessageHandler a wrapper to standardize how we handle NATS messages.
