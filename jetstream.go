@@ -199,7 +199,7 @@ func NewNATSConnection(NATSJSHost string, clients []JetStreamRegistrar, natsOpts
 			logrus.Infof("NATS got reconnected to %q\n", nc.ConnectedUrl())
 		}),
 		nats.ClosedHandler(func(nc *nats.Conn) {
-			logrus.Errorf("NATS connection closed. Reason: %q\n", nc.LastError())
+			logrus.Errorf("NATS connection closed. reason: %q\n", nc.LastError())
 		}),
 	}
 
@@ -207,7 +207,7 @@ func NewNATSConnection(NATSJSHost string, clients []JetStreamRegistrar, natsOpts
 
 	nc, err := nats.Connect(NATSJSHost, natsOpts...)
 	if err != nil {
-		logrus.Errorf("failed to connect nats server. reason: %q\n", err)
+		logrus.Errorf("NATS failed to connect. reason: %q\n", err)
 		return nil, err
 	}
 
