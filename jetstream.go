@@ -1,6 +1,7 @@
 package ferstream
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kumparan/go-utils"
@@ -196,7 +197,7 @@ func NewNATSConnection(NATSJSHost string, clients []JetStreamRegistrar, natsOpts
 				return
 			}
 
-			logrus.Infof("NATS got reconnected to %q\n", nc.ConnectedUrl())
+			fmt.Printf("NATS got reconnected to %q\n", nc.ConnectedUrl())
 		}),
 		nats.ClosedHandler(func(nc *nats.Conn) {
 			logrus.Errorf("NATS connection closed. reason: %q\n", nc.LastError())
