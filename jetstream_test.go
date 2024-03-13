@@ -395,7 +395,7 @@ func TestConsumerInfo(t *testing.T) {
 	_, err = n.AddStream(updateConf)
 	require.NoError(t, err)
 
-	_, err = n.QueueSubscribe("STREAM_EVENT.A", "QUEUEUEUE", func(msg *nats.Msg) {}, nats.Durable("DURABLE_NAME"))
+	_, err = n.QueueSubscribe("STREAM_EVENT.A", "QUEUEUEUE", func(_ *nats.Msg) {}, nats.Durable("DURABLE_NAME"))
 	require.NoError(t, err)
 
 	consumerInfo, err := n.ConsumerInfo("STREAM_NAME", "DURABLE_NAME")
