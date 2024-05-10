@@ -196,7 +196,7 @@ func (n *NatsEventMessage) wrapError(err error) {
 
 // ParseFromBytes :nodoc:
 func (n *NatsEventMessage) ParseFromBytes(data []byte) (err error) {
-	err = tapao.Unmarshal(data, &n, tapao.With(tapao.JSON), tapao.FallbackWith(tapao.MessagePack))
+	err = json.Unmarshal(data, &n)
 	if err != nil {
 		n.Error = errors.Wrap(n.Error, err.Error())
 		return err
@@ -237,7 +237,7 @@ func (n *NatsEventAuditLogMessage) Build() (data []byte, err error) {
 
 // ParseFromBytes :nodoc:
 func (n *NatsEventAuditLogMessage) ParseFromBytes(data []byte) (err error) {
-	err = tapao.Unmarshal(data, &n, tapao.With(tapao.JSON))
+	err = json.Unmarshal(data, &n)
 	if err != nil {
 		n.Error = errors.Wrap(n.Error, err.Error())
 		return err
@@ -272,20 +272,20 @@ func (n *NatsEventAuditLogMessage) wrapError(err error) {
 // ParseJSON parse JSON into Nats event message
 func ParseJSON(in string) (*NatsEventMessage, error) {
 	msg := &NatsEventMessage{}
-	err := tapao.Unmarshal([]byte(in), msg, tapao.With(tapao.JSON))
+	err := json.Unmarshal([]byte(in), msg)
 	return msg, err
 }
 
 // ParseNatsEventMessageFromBytes :nodoc:
 func ParseNatsEventMessageFromBytes(in []byte) (*NatsEventMessage, error) {
 	msg := &NatsEventMessage{}
-	err := tapao.Unmarshal(in, msg, tapao.With(tapao.JSON))
+	err := json.Unmarshal(in, msg)
 	return msg, err
 }
 
 // ParseNatsEventAuditLogMessageFromBytes :nodoc:
 func ParseNatsEventAuditLogMessageFromBytes(in []byte) (*NatsEventAuditLogMessage, error) {
 	msg := &NatsEventAuditLogMessage{}
-	err := tapao.Unmarshal(in, msg, tapao.With(tapao.JSON))
+	err := json.Unmarshal(in, msg)
 	return msg, err
 }

@@ -133,7 +133,7 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.NotNil(t, message)
 
 		var result NatsEventMessage
-		err = tapao.Unmarshal(message, &result, tapao.With(tapao.JSON))
+		err = json.Unmarshal(message, &result)
 		assert.NoError(t, err)
 		assert.Equal(t, event.ID, result.NatsEvent.ID)
 		assert.Equal(t, event.UserID, result.NatsEvent.UserID)
@@ -159,7 +159,7 @@ func TestNatsEventMessage_Build(t *testing.T) {
 		assert.NotNil(t, message)
 
 		var result NatsEventMessage
-		err = tapao.Unmarshal(message, &result, tapao.With(tapao.JSON))
+		err = json.Unmarshal(message, &result)
 		assert.NoError(t, err)
 		assert.Equal(t, event.ID, result.NatsEvent.ID)
 		assert.Equal(t, event.UserID, result.NatsEvent.UserID)
@@ -334,7 +334,7 @@ func TestNatsEventAuditLogMessage_Build(t *testing.T) {
 		assert.NotNil(t, msgByte)
 
 		var result NatsEventAuditLogMessage
-		err = tapao.Unmarshal(msgByte, &result, tapao.With(tapao.JSON))
+		err = json.Unmarshal(msgByte, &result)
 		assert.NoError(t, err)
 		assert.Equal(t, msg.ServiceName, result.ServiceName)
 		assert.Equal(t, msg.OldData, result.OldData)
