@@ -1,6 +1,7 @@
 package ferstream
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/kumparan/go-utils"
@@ -126,13 +127,13 @@ func (n *NatsEventMessage) Build() (data []byte, err error) {
 		return nil, n.Error
 	}
 
-	message, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	msgInBytes, err := json.Marshal(n)
 	if err != nil {
 		n.wrapError(err)
 		return nil, n.Error
 	}
 
-	return message, nil
+	return msgInBytes, nil
 }
 
 // WithEvent :nodoc:
@@ -210,13 +211,13 @@ func (n *NatsEventMessage) AddSubject(subj string) {
 
 // ToJSONString marshal message to JSON string
 func (n *NatsEventMessage) ToJSONString() (string, error) {
-	bt, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	bt, err := json.Marshal(n)
 	return string(bt), err
 }
 
 // ToJSONByte marshal message to JSON byte
 func (n *NatsEventMessage) ToJSONByte() ([]byte, error) {
-	return tapao.Marshal(n, tapao.With(tapao.JSON))
+	return json.Marshal(n)
 }
 
 // Build :nodoc:
@@ -225,13 +226,13 @@ func (n *NatsEventAuditLogMessage) Build() (data []byte, err error) {
 		return nil, n.Error
 	}
 
-	message, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	msgInBytes, err := json.Marshal(n)
 	if err != nil {
 		n.wrapError(err)
 		return nil, n.Error
 	}
 
-	return message, nil
+	return msgInBytes, nil
 }
 
 // ParseFromBytes :nodoc:
@@ -251,13 +252,13 @@ func (n *NatsEventAuditLogMessage) AddSubject(subj string) {
 
 // ToJSONString marshal message to JSON string
 func (n *NatsEventAuditLogMessage) ToJSONString() (string, error) {
-	bt, err := tapao.Marshal(n, tapao.With(tapao.JSON))
+	bt, err := json.Marshal(n)
 	return string(bt), err
 }
 
 // ToJSONByte marshal message to JSON byte
 func (n *NatsEventAuditLogMessage) ToJSONByte() ([]byte, error) {
-	return tapao.Marshal(n, tapao.With(tapao.JSON))
+	return json.Marshal(n)
 }
 
 func (n *NatsEventAuditLogMessage) wrapError(err error) {
