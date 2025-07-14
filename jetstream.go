@@ -219,19 +219,26 @@ func NewNATSConnection(NATSJSHost string, clients []JetStreamRegistrar, natsOpts
 func registerJetStreamClient(js JetStream, clients []JetStreamRegistrar) error {
 	for _, client := range clients {
 		client.RegisterNATSJetStream(js)
+	}
+
+	for _, client := range clients {
 		if streamRegistrar, ok := client.(StreamRegistrar); ok {
 			err := streamRegistrar.InitStream()
 			if err != nil {
+				logrus.WithField("client", fmt.Sprintf("%T", client)).Error(err)
 				return err
 			}
 		}
+
 		if subscriber, ok := client.(Subscriber); ok {
 			err := subscriber.SubscribeJetStreamEvent()
 			if err != nil {
+				logrus.WithField("client", fmt.Sprintf("%T", client)).Error(err)
 				return err
 			}
 		}
 	}
+
 	return nil
 }
 
