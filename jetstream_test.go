@@ -6,11 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kumparan/ferstream/mock"
 	"github.com/nats-io/nats-server/v2/server"
 	natsserver "github.com/nats-io/nats-server/v2/test"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 const defaultURL = "nats://127.0.0.1:4222"
@@ -406,4 +408,58 @@ func TestConsumerInfo(t *testing.T) {
 	require.Error(t, err)
 	assert.Nil(t, consumerInfo2)
 	assert.Equal(t, nats.ErrConsumerNotFound, err)
+}
+
+type sClient struct {
+	js               JetStream
+	isInitError      bool
+	isSubscribeError bool
+}
+
+func (c *sClient) RegisterNATSJetStream(js JetStream) {
+	c.js = js
+}
+
+func (c *sClient) InitStream() error {
+	if c.isInitError {
+		return assert.AnError
+	}
+	return nil
+}
+
+func (c *sClient) SubscribeJetStreamEvent() error {
+	if c.isSubscribeError {
+		return assert.AnError
+	}
+	return nil
+}
+
+func TestRegisterJetStreamClient(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	mockJS := mock.NewMockJetStream(ctrl)
+
+	t.Run("success - register, init, and subscribe", func(t *testing.T) {
+		testClient := new(sClient)
+
+		err := registerJetStreamClient(mockJS, []JetStreamRegistrar{testClient})
+		assert.NoError(t, err)
+	})
+
+	t.Run("error on init stream", func(t *testing.T) {
+		testClient := new(sClient)
+		testClient.isInitError = true
+
+		err := registerJetStreamClient(mockJS, []JetStreamRegistrar{testClient})
+		assert.Error(t, err)
+		assert.NotNil(t, testClient.js)
+	})
+
+	t.Run("error on subscribe", func(t *testing.T) {
+		testClient := new(sClient)
+		testClient.isSubscribeError = true
+
+		err := registerJetStreamClient(mockJS, []JetStreamRegistrar{testClient})
+		assert.Error(t, err)
+		assert.NotNil(t, testClient.js)
+	})
 }

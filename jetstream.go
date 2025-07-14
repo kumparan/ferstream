@@ -225,7 +225,7 @@ func registerJetStreamClient(js JetStream, clients []JetStreamRegistrar) error {
 		if streamRegistrar, ok := client.(StreamRegistrar); ok {
 			err := streamRegistrar.InitStream()
 			if err != nil {
-				logrus.WithField("client", client).Error(err)
+				logrus.WithField("client", fmt.Sprintf("%T", client)).Error(err)
 				return err
 			}
 		}
@@ -233,7 +233,7 @@ func registerJetStreamClient(js JetStream, clients []JetStreamRegistrar) error {
 		if subscriber, ok := client.(Subscriber); ok {
 			err := subscriber.SubscribeJetStreamEvent()
 			if err != nil {
-				logrus.WithField("client", client).Error(err)
+				logrus.WithField("client", fmt.Sprintf("%T", client)).Error(err)
 				return err
 			}
 		}
