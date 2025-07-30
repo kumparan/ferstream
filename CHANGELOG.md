@@ -1,6 +1,19 @@
 # Ferstream
 
 
+<a name="v1.9.3"></a>
+## [v1.9.3] - 2025-07-29
+### Other Improvements
+- upgrade go version to 1.23.4
+- upgrade library to resolve security issue
+
+
+<a name="v1.9.2"></a>
+## [v1.9.2] - 2025-07-14
+### Fixes
+- fix register jetstream to register all clients first before init stream and subscribe ([#25](https://github.com/kumparan/ferstream/issues/25))
+
+
 <a name="v1.9.1"></a>
 ## [v1.9.1] - 2024-07-11
 ### Other Improvements
@@ -134,7 +147,9 @@
 - implement jetstream
 
 
-[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.1...HEAD
+[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.3...HEAD
+[v1.9.3]: https://github.com/kumparan/ferstream/compare/v1.9.2...v1.9.3
+[v1.9.2]: https://github.com/kumparan/ferstream/compare/v1.9.1...v1.9.2
 [v1.9.1]: https://github.com/kumparan/ferstream/compare/v1.9.0...v1.9.1
 [v1.9.0]: https://github.com/kumparan/ferstream/compare/v1.8.3...v1.9.0
 [v1.8.3]: https://github.com/kumparan/ferstream/compare/v1.8.2...v1.8.3
