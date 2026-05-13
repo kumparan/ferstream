@@ -1,11 +1,16 @@
 # Ferstream
 
 
+<a name="v1.9.4"></a>
+## [v1.9.4] - 2026-05-13
+### New Features
+- update go and dependencies
+
+
 <a name="v1.9.3"></a>
-## [v1.9.3] - 2025-07-29
+## [v1.9.3] - 2025-07-30
 ### Other Improvements
-- upgrade go version to 1.23.4
-- upgrade library to resolve security issue
+- resolve security issues from Dependabot by upgrading golang.org/x/net, golang.org/x/crypto, nats.go and nats-server ([#27](https://github.com/kumparan/ferstream/issues/27)) ([#28](https://github.com/kumparan/ferstream/issues/28))
 
 
 <a name="v1.9.2"></a>
@@ -147,7 +152,8 @@
 - implement jetstream
 
 
-[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.3...HEAD
+[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.4...HEAD
+[v1.9.4]: https://github.com/kumparan/ferstream/compare/v1.9.3...v1.9.4
 [v1.9.3]: https://github.com/kumparan/ferstream/compare/v1.9.2...v1.9.3
 [v1.9.2]: https://github.com/kumparan/ferstream/compare/v1.9.1...v1.9.2
 [v1.9.1]: https://github.com/kumparan/ferstream/compare/v1.9.0...v1.9.1

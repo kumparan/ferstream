@@ -163,13 +163,13 @@ func (n *NatsEventMessage) WithEvent(e *NatsEvent) *NatsEventMessage {
 }
 
 // WithBody :nodoc:
-func (n *NatsEventMessage) WithBody(body interface{}) *NatsEventMessage {
+func (n *NatsEventMessage) WithBody(body any) *NatsEventMessage {
 	n.Body = utils.Dump(body)
 	return n
 }
 
 // WithOldBody :nodoc:
-func (n *NatsEventMessage) WithOldBody(body interface{}) *NatsEventMessage {
+func (n *NatsEventMessage) WithOldBody(body any) *NatsEventMessage {
 	n.OldBody = utils.Dump(body)
 	return n
 }
