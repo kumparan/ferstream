@@ -6,18 +6,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
 
       - name: Set up Go
-        uses: actions/setup-go@v3
+        uses: actions/setup-go@v6
         with:
           go-version: 1.26.0
 
       - name: Golangci-lint
-        uses: golangci/golangci-lint-action@v7
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v2.10.1
-          args: --print-issued-lines=false --exclude-use-default=false --enable=revive --enable=goimports --enable=unconvert --concurrency=2
 
       - name: Test
         run: go test -v ./...
