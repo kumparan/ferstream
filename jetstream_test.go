@@ -84,7 +84,7 @@ func TestQueueSubscribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			_, err = n.Publish(subject, msgBytes)
 			require.NoError(t, err)
 		}
@@ -95,7 +95,7 @@ func TestQueueSubscribe(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			b := <-receiverCh
 
 			assert.Equal(t, msgBytes, b.Data)
@@ -162,7 +162,7 @@ func TestQueueSubscribe(t *testing.T) {
 		msgBytes, err := msg.Build()
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			_, err = n.Publish(subject, msgBytes)
 			require.NoError(t, err)
 
@@ -174,7 +174,7 @@ func TestQueueSubscribe(t *testing.T) {
 		})
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			b := <-receiverCh
 
 			assert.Equal(t, msgBytes, b.Data)
@@ -230,19 +230,19 @@ func TestSubscribe(t *testing.T) {
 
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			_, err = n.Publish(subject, msgBytes)
 			require.NoError(t, err)
 		}
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			b := <-receiverChS1
 
 			assert.Equal(t, msgBytes, b.Data)
 			assert.Equal(t, subject, b.Subject, "test subject")
 		}
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			b := <-receiverChS2
 
 			assert.Equal(t, msgBytes, b.Data)
@@ -329,20 +329,20 @@ func TestSubscribe(t *testing.T) {
 		msgBytes, err := msg.Build()
 		require.NoError(t, err)
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			_, err = n.Publish(subject, msgBytes)
 			require.NoError(t, err)
 
 		}
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			b := <-receiverChS1
 
 			assert.Equal(t, msgBytes, b.Data)
 			assert.Equal(t, subject, b.Subject, "test subject")
 		}
 
-		for i := 0; i < countMsg; i++ {
+		for range countMsg {
 			b := <-receiverChS2
 
 			assert.Equal(t, msgBytes, b.Data)
