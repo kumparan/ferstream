@@ -1,10 +1,16 @@
 # Ferstream
 
 
+<a name="v1.9.6"></a>
+## [v1.9.6] - 2026-09-02
+### Other Improvements
+- update dependencies and fix failed unit test
+
+
 <a name="v1.9.5"></a>
 ## [v1.9.5] - 2026-07-15
 ### Other Improvements
-- bump go.mod to fix security in crypto library
+- bump go.mod to fix security in crypto library ([#30](https://github.com/kumparan/ferstream/issues/30))
 
 
 <a name="v1.9.4"></a>
@@ -158,7 +164,8 @@
 - implement jetstream
 
 
-[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.5...HEAD
+[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.6...HEAD
+[v1.9.6]: https://github.com/kumparan/ferstream/compare/v1.9.5...v1.9.6
 [v1.9.5]: https://github.com/kumparan/ferstream/compare/v1.9.4...v1.9.5
 [v1.9.4]: https://github.com/kumparan/ferstream/compare/v1.9.3...v1.9.4
 [v1.9.3]: https://github.com/kumparan/ferstream/compare/v1.9.2...v1.9.3
