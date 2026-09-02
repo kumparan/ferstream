@@ -20,15 +20,16 @@ const defaultURL = "nats://127.0.0.1:4222"
 func RunBasicJetStreamServer() *server.Server {
 	opts := natsserver.DefaultTestOptions
 	opts.JetStream = true
-	opts.StoreDir = ".jetstream_log"
+	opts.StoreDir, _ = os.MkdirTemp("", "jetstream_log")
 	return natsserver.RunServer(&opts)
 }
 
-func TestMain(t *testing.M) {
+func TestMain(m *testing.M) {
 	srv := RunBasicJetStreamServer()
-	defer srv.Shutdown()
-	m := t.Run()
-	os.Exit(m)
+	code := m.Run()
+	srv.Shutdown()
+	os.RemoveAll(srv.StoreDir())
+	os.Exit(code)
 }
 
 func TestPublish(t *testing.T) {
