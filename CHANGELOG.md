@@ -1,6 +1,12 @@
 # Ferstream
 
 
+<a name="v1.9.7"></a>
+## [v1.9.7] - 2026-09-03
+### Other Improvements
+- fix dependabot issue
+
+
 <a name="v1.9.6"></a>
 ## [v1.9.6] - 2026-09-02
 ### Other Improvements
@@ -164,7 +170,8 @@
 - implement jetstream
 
 
-[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.6...HEAD
+[Unreleased]: https://github.com/kumparan/ferstream/compare/v1.9.7...HEAD
+[v1.9.7]: https://github.com/kumparan/ferstream/compare/v1.9.6...v1.9.7
 [v1.9.6]: https://github.com/kumparan/ferstream/compare/v1.9.5...v1.9.6
 [v1.9.5]: https://github.com/kumparan/ferstream/compare/v1.9.4...v1.9.5
 [v1.9.4]: https://github.com/kumparan/ferstream/compare/v1.9.3...v1.9.4
